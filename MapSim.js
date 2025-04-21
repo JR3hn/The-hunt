@@ -12,12 +12,25 @@ class MapSim {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext('2d');
     this.isPaused = false;
-    this.updateInterval = 500; // milliseconds
+    this.updateInterval = 300; // milliseconds
     this.lastUpdate = 0;
+
+    this.lastPredatorCount = 400;
+    this.lastPreyCount = 800;
+    this.lastCellSize = MapSim.CELL_SIZE;
     
     this.canvas.width = window.innerWidth - 20;
     this.canvas.height = window.innerHeight - 150;
     
+    this.initializeMap();
+
+    this.setupControls();
+    this.animationId = null;
+
+    this.showConfigDialog();
+  }
+
+  initializeMap() {
     const mapWidth = Math.floor(this.canvas.width / MapSim.CELL_SIZE);
     const mapHeight = Math.floor(this.canvas.height / MapSim.CELL_SIZE);
     
@@ -36,22 +49,126 @@ class MapSim {
         MapSim.map.addGrassAt(x, y);
       }
     }
+  }
+
+  showConfigDialog() {
+    const configDiv = document.createElement('div');
+    configDiv.id = 'config-dialog';
+    configDiv.style.position = 'fixed';
+    configDiv.style.top = '50%';
+    configDiv.style.left = '50%';
+    configDiv.style.transform = 'translate(-50%, -50%)';
+    configDiv.style.backgroundColor = 'white';
+    configDiv.style.padding = '20px';
+    configDiv.style.borderRadius = '8px';
+    configDiv.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    configDiv.style.zIndex = '1000';
+    configDiv.style.width = '300px';
     
-    // Add initial predators and prey
-    for (let i = 0; i < 400; i++) {
+    const header = document.createElement('h2');
+    header.textContent = 'Konfigurera Simulation';
+    configDiv.appendChild(header);
+
+    const cellSizeLabel = document.createElement('label');
+    cellSizeLabel.textContent = 'Cellstorlek (pixlar): ';
+    cellSizeLabel.setAttribute('for', 'cell-size');
+    configDiv.appendChild(cellSizeLabel);
+    
+    const cellSizeInput = document.createElement('input');
+    cellSizeInput.type = 'number';
+    cellSizeInput.id = 'cell-size';
+    cellSizeInput.min = '3';
+    cellSizeInput.max = '20';
+    cellSizeInput.value = String(this.lastCellSize);
+    cellSizeInput.style.width = '100%';
+    cellSizeInput.style.marginBottom = '20px';
+    configDiv.appendChild(cellSizeInput);
+    
+    // Predator input
+    const predatorLabel = document.createElement('label');
+    predatorLabel.textContent = 'Antal rovdjur: ';
+    predatorLabel.setAttribute('for', 'predator-count');
+    configDiv.appendChild(predatorLabel);
+    
+    const predatorInput = document.createElement('input');
+    predatorInput.type = 'number';
+    predatorInput.id = 'predator-count';
+    predatorInput.min = '0';
+    predatorInput.max = '1000';
+    predatorInput.value = String(this.lastPredatorCount);
+    predatorInput.style.width = '100%';
+    predatorInput.style.marginBottom = '15px';
+    configDiv.appendChild(predatorInput);
+    
+    // Prey input
+    const preyLabel = document.createElement('label');
+    preyLabel.textContent = 'Antal byten: ';
+    preyLabel.setAttribute('for', 'prey-count');
+    configDiv.appendChild(preyLabel);
+    
+    const preyInput = document.createElement('input');
+    preyInput.type = 'number';
+    preyInput.id = 'prey-count';
+    preyInput.min = '0';
+    preyInput.max = '2000';
+    preyInput.value = String(this.lastPreyCount);
+    preyInput.style.width = '100%';
+    preyInput.style.marginBottom = '20px';
+    configDiv.appendChild(preyInput);
+    
+    // Start button
+    const startButton = document.createElement('button');
+    startButton.textContent = 'Starta Simulation';
+    startButton.style.width = '100%';
+    startButton.style.padding = '10px';
+    startButton.style.backgroundColor = '#4CAF50';
+    startButton.style.color = 'white';
+    startButton.style.border = 'none';
+    startButton.style.borderRadius = '4px';
+    startButton.style.cursor = 'pointer';
+    startButton.addEventListener('click', () => {
+      const predatorCount = parseInt(predatorInput.value, 10);
+      const preyCount = parseInt(preyInput.value, 10);
+      const cellSize = parseInt(cellSizeInput.value, 10);
+
+      this.lastPredatorCount = predatorCount;
+      this.lastPreyCount = preyCount;
+      this.lastCellSize = cellSize;
+      
+      // Uppdatera cellstorleken och återinitiera kartan
+      MapSim.CELL_SIZE = cellSize;
+      this.initializeMap();
+      
+      // Initialize entities with user-configured values
+      const mapWidth = Math.floor(this.canvas.width / MapSim.CELL_SIZE);
+      const mapHeight = Math.floor(this.canvas.height / MapSim.CELL_SIZE);
+      this.initializeEntities(predatorCount, preyCount, mapWidth, mapHeight);
+      
+      // Remove the config dialog
+      document.body.removeChild(configDiv);
+      
+      // Start the simulation
+      this.start();
+    });
+    
+    configDiv.appendChild(startButton);
+    document.body.appendChild(configDiv);
+  }
+
+  initializeEntities(predatorCount, preyCount, mapWidth, mapHeight) {
+    // Add predators
+    for (let i = 0; i < predatorCount; i++) {
       const randomX = Math.floor(Math.random() * mapWidth);
       const randomY = Math.floor(Math.random() * mapHeight);
       MapSim.map.addEntityAt(randomX, randomY, new Predator(randomX, randomY));
     }
     
-    for (let i = 0; i < 600; i++) {
+    // Add prey
+    for (let i = 0; i < preyCount; i++) {
       const randomX = Math.floor(Math.random() * mapWidth);
       const randomY = Math.floor(Math.random() * mapHeight);
       MapSim.map.addEntityAt(randomX, randomY, new Prey(randomX, randomY));
     }
-    
-    this.setupControls();
-    this.animationId = null;
   }
   
   setupControls() {
@@ -77,10 +194,24 @@ class MapSim {
       this.updateInterval += 100;
       console.log(`Update interval: ${this.updateInterval}ms`);
     });
+
+    const resetButton = document.createElement('button');
+    resetButton.textContent = 'Reset Simulation';
+    resetButton.style.marginLeft = '20px';
+    resetButton.style.backgroundColor = '#2196F3'; // Blå färg
+    resetButton.style.color = 'white';
+    resetButton.style.border = 'none';
+    resetButton.style.borderRadius = '4px';
+    resetButton.style.padding = '8px 16px';
+    resetButton.style.cursor = 'pointer';
+    resetButton.addEventListener('click', () => {
+      this.resetSimulation();
+    });
     
     controlsDiv.appendChild(pauseButton);
     controlsDiv.appendChild(speedUpButton);
     controlsDiv.appendChild(slowDownButton);
+    controlsDiv.appendChild(resetButton);
   }
   
   start() {
@@ -261,6 +392,24 @@ class MapSim {
         <p>Grass Grown: ${MapSim.map.getGrassGrown()}</p>
       </div>
     `;
+  }
+
+  resetSimulation() {
+    // Stoppa animationsloopen
+    cancelAnimationFrame(this.animationId);
+    
+    // Återställ statistik
+    MapSim.currentTurn = 0;
+    
+    // Återställ kartan genom att anropa initialisering igen
+    this.initializeMap();
+    
+    // Visa konfigurationsrutan igen
+    this.showConfigDialog();
+    
+    // Rensa statistikdisplayen
+    const statsDiv = document.getElementById('stats');
+    statsDiv.innerHTML = '';
   }
 }
 
