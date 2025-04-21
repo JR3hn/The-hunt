@@ -94,18 +94,32 @@ class MapSim {
       this.lastUpdate = timestamp;
       this.update();
     }
-    
-    this.render();
   }
   
   update() {
     MapSim.currentTurn++;
-    
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
     // Process grass growth
     for (let x = 0; x < MapSim.map.getWidth(); x++) {
       for (let y = 0; y < MapSim.map.getHeight(); y++) {
         const grass = MapSim.map.getGrassAt(x, y);
-        if (grass) grass.turn();
+        if (grass) {
+          grass.turn();
+          // Make sure to access getNutrition only if grass exists
+          if (grass.getNutrition() >= 1) {
+            this.ctx.fillStyle = 'green';
+          } else {
+            this.ctx.fillStyle = '#3D2413'; // Brown for no nutrition
+          }
+          this.ctx.fillRect(
+            x * MapSim.CELL_SIZE, 
+            y * MapSim.CELL_SIZE, 
+            MapSim.CELL_SIZE, 
+            MapSim.CELL_SIZE
+          );
+        }
       }
     }
     
@@ -114,13 +128,13 @@ class MapSim {
       for (let y = 0; y < this.newPredators[x].length; y++) {
         if (this.newPredators[x][y]) {
           const newPredator = Predator.procreate(x, y);
-          MapSim.map.addEntityAt(x, y, newPredator);
+          MapSim.map.addEntityAt(newPredator.getCurrentX(), newPredator.getCurrentY(), newPredator);
           this.newPredators[x][y] = false;
         }
         
         if (this.newPreys[x][y]) {
           const newPrey = Prey.procreate(x, y);
-          MapSim.map.addEntityAt(x, y, newPrey);
+          MapSim.map.addEntityAt(newPrey.getCurrentX(), newPrey.getCurrentY(), newPrey);
           this.newPreys[x][y] = false;
         }
       }
@@ -152,6 +166,21 @@ class MapSim {
       
       if (predator.isDead()) {
         this.deadPredators.push(predator);
+      } else {
+        this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+        this.ctx.strokeStyle = 'black';
+        this.ctx.fillRect(
+          currentX * MapSim.CELL_SIZE,
+          currentY * MapSim.CELL_SIZE,
+          MapSim.CELL_SIZE,
+          MapSim.CELL_SIZE
+        );
+        this.ctx.strokeRect(
+          currentX * MapSim.CELL_SIZE,
+          currentY * MapSim.CELL_SIZE,
+          MapSim.CELL_SIZE,
+          MapSim.CELL_SIZE
+        );
       }
     }
     
@@ -168,6 +197,21 @@ class MapSim {
       
       if (prey.isDead()) {
         this.deadPreys.push(prey);
+      } else {
+        this.ctx.fillStyle = 'rgba(0, 0, 255, 0.7)';
+        this.ctx.strokeStyle = 'black';
+        this.ctx.fillRect(
+          currentX * MapSim.CELL_SIZE,
+          currentY * MapSim.CELL_SIZE,
+          MapSim.CELL_SIZE,
+          MapSim.CELL_SIZE
+        );
+        this.ctx.strokeRect(
+          currentX * MapSim.CELL_SIZE,
+          currentY * MapSim.CELL_SIZE,
+          MapSim.CELL_SIZE,
+          MapSim.CELL_SIZE
+        );
       }
     }
     
@@ -188,67 +232,6 @@ class MapSim {
     
     // Update stats display
     this.updateStats();
-  }
-  
-  render() {
-    // Clear canvas
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    // Draw grass
-    for (let x = 0; x < MapSim.map.getWidth(); x++) {
-      for (let y = 0; y < MapSim.map.getHeight(); y++) {
-        const grass = MapSim.map.getGrassAt(x, y);
-        if (grass) {
-          if (grass.getNutrition() >= 1) {
-            this.ctx.fillStyle = 'green';
-          } else {
-            this.ctx.fillStyle = '#3D2413'; // Brown for no nutrition
-          }
-          this.ctx.fillRect(
-            x * MapSim.CELL_SIZE, 
-            y * MapSim.CELL_SIZE, 
-            MapSim.CELL_SIZE, 
-            MapSim.CELL_SIZE
-          );
-        }
-      }
-    }
-    
-    // Draw prey
-    for (const prey of MapSim.map.getAllPreys()) {
-      this.ctx.fillStyle = 'rgba(0, 0, 255, 0.7)';
-      this.ctx.strokeStyle = 'black';
-      this.ctx.fillRect(
-        prey.getCurrentX() * MapSim.CELL_SIZE,
-        prey.getCurrentY() * MapSim.CELL_SIZE,
-        MapSim.CELL_SIZE,
-        MapSim.CELL_SIZE
-      );
-      this.ctx.strokeRect(
-        prey.getCurrentX() * MapSim.CELL_SIZE,
-        prey.getCurrentY() * MapSim.CELL_SIZE,
-        MapSim.CELL_SIZE,
-        MapSim.CELL_SIZE
-      );
-    }
-    
-    // Draw predators
-    for (const predator of MapSim.map.getAllPredators()) {
-      this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
-      this.ctx.strokeStyle = 'black';
-      this.ctx.fillRect(
-        predator.getCurrentX() * MapSim.CELL_SIZE,
-        predator.getCurrentY() * MapSim.CELL_SIZE,
-        MapSim.CELL_SIZE,
-        MapSim.CELL_SIZE
-      );
-      this.ctx.strokeRect(
-        predator.getCurrentX() * MapSim.CELL_SIZE,
-        predator.getCurrentY() * MapSim.CELL_SIZE,
-        MapSim.CELL_SIZE,
-        MapSim.CELL_SIZE
-      );
-    }
   }
   
   updateStats() {
