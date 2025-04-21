@@ -1,3 +1,4 @@
+import Prey from './Prey.js'; 
 class Predator {
 
     static map = null;
@@ -13,19 +14,19 @@ class Predator {
     }
 
     static setMap(mainMap) {
-        map = mainMap;
+        Predator.map = mainMap;
     }
 
     static getInitialLife(){
-        return INITIAL_LIFE;
+        return Predator.INITIAL_LIFE;
     }
 
     static getInitialEnergy(){
-        return INITIAL_ENERGY;
+        return Predator.INITIAL_ENERGY;
     }
 
     getCurrentX(){
-        return currentX;
+        return this.currentX;
     }
 
     getEnergy() {
@@ -37,11 +38,11 @@ class Predator {
     }
 
     getCurrentY(){
-        return currentY;
+        return this.currentY;
     }
 
     resetTurn(){
-        hasActed = false;
+        this.hasActed = false;
     }
 
     isDead() {

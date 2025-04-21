@@ -1,4 +1,6 @@
 import Grass from './Grass.js';
+import Predator from './Predator.js';
+import Prey from './Prey.js'; 
 
 class Map {
     constructor(width, height) {
@@ -18,41 +20,6 @@ class Map {
         
         // Store reference to map for inner class
         const mapInstance = this;
-        
-        // Inner Grass class definition
-        this.Grass = class {
-          constructor() {
-            this.nextGrow = 0;
-            this.nutrition = 2;
-          }
-          
-          getNextGrow() {
-            return this.nextGrow;
-          }
-          
-          resetNextGrow() {
-            this.nextGrow = 0;
-          }
-          
-          getNutrition() {
-            return this.nutrition;
-          }
-          
-          turn() {
-            this.nextGrow++;
-            if (this.nextGrow % 25 === 0) {
-              this.nutrition++;
-              this.nextGrow = 0;
-              mapInstance.incrementGrassGrown();
-            }
-          }
-          
-          consume() {
-            if (this.nutrition > 0) {
-              this.nutrition--;
-            }
-          }
-        };
     }
       
 
@@ -215,12 +182,12 @@ class Map {
         }
         
         for (const object of this.grid[x][y]) {
-          if (object instanceof this.Grass) {
+          if (object instanceof Grass) {
             return false;
           }
         }
         
-        this.grid[x][y].push(new this.Grass());
+        this.grid[x][y].push(new Grass(this));
         return true;
     }
     
@@ -231,7 +198,7 @@ class Map {
       
       for (let i = 0; i < this.grid[x][y].length; i++) {
         const object = this.grid[x][y][i];
-        if (object instanceof this.Grass) {
+        if (object instanceof Grass) {
           this.grid[x][y].splice(i, 1);
           return true;
         }
@@ -242,7 +209,7 @@ class Map {
     
     getGrassAt(x, y) {
       for (const object of this.grid[x][y]) {
-        if (object instanceof this.Grass) {
+        if (object instanceof Grass) {
           return object;
         }
       }
@@ -251,7 +218,7 @@ class Map {
     
     checkForGrassAt(x, y) {
       for (const object of this.grid[x][y]) {
-        if (object instanceof this.Grass) {
+        if (object instanceof Grass) {
           return true;
         }
       }
