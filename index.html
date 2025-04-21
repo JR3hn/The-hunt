@@ -1,1 +1,63 @@
-<h1>Hello! </h1>
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapSim Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+        }
+        canvas {
+            border: 1px solid #333;
+            display: block;
+            margin-bottom: 10px;
+        }
+        #controls {
+            margin-bottom: 10px;
+        }
+        #controls button {
+            margin-right: 5px;
+            padding: 5px 10px;
+        }
+        .stats-box {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .final-stats {
+            background-color: #e0f0e0;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ekosystem Simulation</h1>
+    
+    <!-- Canvas för simulation -->
+    <canvas id="simulation-canvas"></canvas>
+    
+    <!-- Kontroller -->
+    <div id="controls"></div>
+    
+    <!-- Statistik -->
+    <div id="stats"></div>
+    
+    <!-- MapSim modul -->
+    <script type="module">
+        import MapSim from './MapSim.js';
+        
+        // När sidan har laddats
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initiera MapSim med canvas-id
+            const mapSim = new MapSim('simulation-canvas');
+            
+            // Starta simulationen
+            mapSim.start();
+        });
+    </script>
+</body>
+</html>
