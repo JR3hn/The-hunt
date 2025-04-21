@@ -18,8 +18,6 @@ class Map {
         this.grassGrown = 0;
         this.preyDead = 0;
         
-        // Store reference to map for inner class
-        const mapInstance = this;
     }
       
 
@@ -131,7 +129,7 @@ class Map {
           }
         }
         return false;
-      }
+    }
 
     moveEntity(fromX, fromY, toX, toY, entity) {
       if (this.inBounds(toX, toY)) {

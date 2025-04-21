@@ -70,7 +70,7 @@ class Predator {
         if (prey){
         prey.killed();
         this.energy += 2;
-        this.lifeSpan += 1;
+        this.lifeSpan++;
         }
     }
 
@@ -177,8 +177,8 @@ class Predator {
     turn() {
         if (!this.hasActed) {
           this.hunt();
-          this.age();
         }
+        this.age();
     }
 }
     
