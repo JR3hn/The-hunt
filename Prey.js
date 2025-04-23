@@ -1,3 +1,5 @@
+import Grass from './Grass.js';
+
 class Prey {
   static map = null;
   static INITIAL_LIFE = 20;
@@ -140,8 +142,7 @@ class Prey {
     this.move();
     this.eat();
     this.age();
-    // Uncomment the next line to enable escape behavior
-    // this.escape();
+    this.escape();
     this.hasActed = true;
   }
   
