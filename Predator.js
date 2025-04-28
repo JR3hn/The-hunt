@@ -67,9 +67,8 @@ class Predator {
     }
 
     kill(prey){
-        if (prey &!& !prey.isDead()) {
+        if (prey){
         prey.killed();
-        Predator.map.removeEntityAt(prey.getCurrentX(), prey.getCurrentY(), prey);
         this.energy += 2;
         this.lifeSpan++;
         }
