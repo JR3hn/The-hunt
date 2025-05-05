@@ -2,7 +2,7 @@ import Grass from './Grass.js';
 
 class Prey {
   static map = null;
-  static INITIAL_LIFE = 20;
+  static INITIAL_LIFE = 30;
   static INITIAL_ENERGY = 0;
   
   constructor(x, y) {

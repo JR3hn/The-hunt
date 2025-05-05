@@ -3,7 +3,7 @@ class Predator {
 
     static map = null;
     static INITIAL_ENERGY = 0;
-    static INITIAL_LIFE = 50;
+    static INITIAL_LIFE = 30;
 
     constructor(initialX, initialY){
         this.lifeSpan = Predator.INITIAL_LIFE;
@@ -70,7 +70,7 @@ class Predator {
         if (prey && !prey.isDead()) {
         prey.killed();
         this.energy += 2;
-        this.lifeSpan++;
+        //this.lifeSpan++;
         }
     }
 
