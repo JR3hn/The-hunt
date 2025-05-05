@@ -174,7 +174,7 @@ class Prey {
   eat() {
     const entitiesAtCurrentPosition = Prey.map.getEntitiesAt(this.currentX, this.currentY);
     for (const entity of entitiesAtCurrentPosition) {
-      if (entity instanceof Grass) {
+      if (entity instanceof Grass && entity.getNutrition() > 0) {
         this.energy += 1;
         entity.consume();
         entity.resetNextGrow();
