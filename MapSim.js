@@ -321,7 +321,7 @@ class MapSim {
       const currentX = prey.getCurrentX();
       const currentY = prey.getCurrentY();
       
-      if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > 3) {
+      if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > 2) {
         this.newPreys[currentX][currentY] = true;
         prey.setEnergy(0);
       }
@@ -371,7 +371,7 @@ class MapSim {
       <div class="stats-box">
         <p>Turn: ${MapSim.currentTurn}</p>
         <p>Predators: ${MapSim.map.getAllPredators().length} (Born: ${MapSim.map.getPredatorBorn()}, Dead: ${MapSim.map.getPredatorDead()})</p>
-        <p>Prey: ${MapSim.map.getAllPreys().length} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten})</p>
+        <p>Prey: ${MapSim.map.getAllPreys().length} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
         <p>Grass: (Eaten: ${MapSim.map.getGrassEaten()}, Grown: ${MapSim.map.getGrassGrown()})</p>
       </div>
     `;
