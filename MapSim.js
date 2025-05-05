@@ -15,8 +15,8 @@ class MapSim {
     this.updateInterval = 300; // milliseconds
     this.lastUpdate = 0;
 
-    this.lastPredatorCount = 400;
-    this.lastPreyCount = 800;
+    this.lastPredatorCount = 800;
+    this.lastPreyCount = 2000;
     this.lastCellSize = MapSim.CELL_SIZE;
     
     this.canvas.width = window.innerWidth - 20;
