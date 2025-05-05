@@ -19,7 +19,7 @@ class Grass {
 
     turn(){
         this.nextGrow++;
-        if (this.nextGrow % 25 === 0){
+        if (this.nextGrow % 10 === 0){
             this.nutrition++;
             this.nextGrow = 0;
             this.map.incrementGrassGrown();
