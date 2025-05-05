@@ -111,7 +111,7 @@ class Predator {
       if (predators) {
         for (const predator of predators) {
           predator.moveToPrey(prey);
-          //predator.hasActed = true;
+          predator.hasActed = true;
         }
       }
     }
@@ -177,8 +177,8 @@ class Predator {
     turn() {
         if (!this.hasActed) {
           this.hunt();
-          this.age();
         }
+        this.age();
     }
 }
     
