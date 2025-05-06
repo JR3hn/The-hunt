@@ -1,7 +1,9 @@
 class Grass {
+    static growthRate = 10;
+
     constructor(map) {
         this.nextGrow = 0;
-        this.nutrition = 2;
+        this.nutrition = 1;
         this.map = map;
     }
 
@@ -19,7 +21,7 @@ class Grass {
 
     turn(){
         this.nextGrow++;
-        if (this.nextGrow % 10 === 0){
+        if (this.nextGrow % Grass.growthRate === 0){
             this.nutrition++;
             this.nextGrow = 0;
             this.map.incrementGrassGrown();

@@ -2,14 +2,14 @@ import Grass from './Grass.js';
 
 class Prey {
   static map = null;
-  static INITIAL_LIFE = 30;
   static INITIAL_ENERGY = 0;
+  static initialLife = 30;
   
   constructor(x, y) {
     this.currentX = x;
     this.currentY = y;
     this.hasActed = false;
-    this.lifeSpan = Prey.INITIAL_LIFE;
+    this.lifeSpan = Prey.initialLife;
     this.energy = Prey.INITIAL_ENERGY;
     this.predatorNearby = false;
   }

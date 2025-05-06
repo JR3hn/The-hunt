@@ -4,9 +4,10 @@ import Prey from './Prey.js';
 import Grass from './Grass.js';
 
 class MapSim {
-  static CELL_SIZE = 7;
+  static cellSize = 7;
   static map = null;
   static currentTurn = 0;
+  static reproductionThreshold = 2;
   
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
@@ -17,7 +18,7 @@ class MapSim {
 
     this.lastPredatorCount = 800;
     this.lastPreyCount = 2000;
-    this.lastCellSize = MapSim.CELL_SIZE;
+    this.lastCellSize = MapSim.cellSize;
     
     this.canvas.width = window.innerWidth - 20;
     this.canvas.height = window.innerHeight - 150;
@@ -31,8 +32,8 @@ class MapSim {
   }
 
   initializeMap() {
-    const mapWidth = Math.floor(this.canvas.width / MapSim.CELL_SIZE);
-    const mapHeight = Math.floor(this.canvas.height / MapSim.CELL_SIZE);
+    const mapWidth = Math.floor(this.canvas.width / MapSim.cellSize);
+    const mapHeight = Math.floor(this.canvas.height / MapSim.cellSize);
     
     MapSim.map = new Map(mapWidth, mapHeight);
     Predator.setMap(MapSim.map);
@@ -115,6 +116,71 @@ class MapSim {
     preyInput.style.width = '100%';
     preyInput.style.marginBottom = '20px';
     configDiv.appendChild(preyInput);
+
+    // Predator lifespan
+    const predatorLifeLabel = document.createElement('label');
+    predatorLifeLabel.textContent = 'Livslängd rovdjur: ';
+    predatorLifeLabel.setAttribute('for', 'predator-life');
+    configDiv.appendChild(predatorLifeLabel);
+    
+    const predatorLifeInput = document.createElement('input');
+    predatorLifeInput.type = 'number';
+    predatorLifeInput.id = 'predator-life';
+    predatorLifeInput.min = '5';
+    predatorLifeInput.max = '100';
+    predatorLifeInput.value = String(Predator.initialLife);
+    predatorLifeInput.style.width = '100%';
+    predatorLifeInput.style.marginBottom = '15px';
+    configDiv.appendChild(predatorLifeInput);
+    
+    // Prey lifespan
+    const preyLifeLabel = document.createElement('label');
+    preyLifeLabel.textContent = 'Livslängd byten: ';
+    preyLifeLabel.setAttribute('for', 'prey-life');
+    configDiv.appendChild(preyLifeLabel);
+    
+    const preyLifeInput = document.createElement('input');
+    preyLifeInput.type = 'number';
+    preyLifeInput.id = 'prey-life';
+    preyLifeInput.min = '5';
+    preyLifeInput.max = '100';
+    preyLifeInput.value = String(Prey.initialLife);
+    preyLifeInput.style.width = '100%';
+    preyLifeInput.style.marginBottom = '15px';
+    configDiv.appendChild(preyLifeInput);
+    
+    // Reproduction threshold
+    const reproThresholdLabel = document.createElement('label');
+    reproThresholdLabel.textContent = 'Energitröskel för reproduktion: ';
+    reproThresholdLabel.setAttribute('for', 'repro-threshold');
+    configDiv.appendChild(reproThresholdLabel);
+    
+    const reproThresholdInput = document.createElement('input');
+    reproThresholdInput.type = 'number';
+    reproThresholdInput.id = 'repro-threshold';
+    reproThresholdInput.min = '1';
+    reproThresholdInput.max = '50';
+    reproThresholdInput.value = String(MapSim.reproductionThreshold);
+    reproThresholdInput.style.width = '100%';
+    reproThresholdInput.style.marginBottom = '15px';
+    configDiv.appendChild(reproThresholdInput);
+    
+    // Grass growth speed
+    const grassSpeedLabel = document.createElement('label');
+    grassSpeedLabel.textContent = 'Hastighet för grästillväxt: ';
+    grassSpeedLabel.setAttribute('for', 'grass-speed');
+    configDiv.appendChild(grassSpeedLabel);
+    
+    const grassSpeedInput = document.createElement('input');
+    grassSpeedInput.type = 'number';
+    grassSpeedInput.id = 'grass-speed';
+    grassSpeedInput.min = '1';
+    grassSpeedInput.max = '50';
+    grassSpeedInput.value = String(Grass.growthRate);
+    grassSpeedInput.style.width = '100%';
+    grassSpeedInput.style.marginBottom = '20px';
+    configDiv.appendChild(grassSpeedInput);
+    
     
     // Start button
     const startButton = document.createElement('button');
@@ -130,18 +196,28 @@ class MapSim {
       const predatorCount = parseInt(predatorInput.value, 10);
       const preyCount = parseInt(preyInput.value, 10);
       const cellSize = parseInt(cellSizeInput.value, 10);
+      const predatorLife = parseInt(predatorLifeInput.value, 10);
+      const preyLife = parseInt(preyLifeInput.value, 10);
+      const reproThreshold = parseInt(reproThresholdInput.value, 10);
+      const grassSpeed = parseInt(grassSpeedInput.value, 10);
 
       this.lastPredatorCount = predatorCount;
       this.lastPreyCount = preyCount;
       this.lastCellSize = cellSize;
       
+      MapSim.cellSize = cellSize;
+      Predator.initialLife = predatorLife;
+      Prey.initialLife = preyLife;
+      MapSim.reproductionThreshold = reproThreshold;
+      Grass.growthRate = grassSpeed;
+
       // Uppdatera cellstorleken och återinitiera kartan
-      MapSim.CELL_SIZE = cellSize;
+      MapSim.cellSize = cellSize;
       this.initializeMap();
       
       // Initialize entities with user-configured values
-      const mapWidth = Math.floor(this.canvas.width / MapSim.CELL_SIZE);
-      const mapHeight = Math.floor(this.canvas.height / MapSim.CELL_SIZE);
+      const mapWidth = Math.floor(this.canvas.width / MapSim.cellSize);
+      const mapHeight = Math.floor(this.canvas.height / MapSim.cellSize);
       this.initializeEntities(predatorCount, preyCount, mapWidth, mapHeight);
       
       // Remove the config dialog
@@ -245,10 +321,10 @@ class MapSim {
             this.ctx.fillStyle = '#3D2413'; // Brown for no nutrition
           }
           this.ctx.fillRect(
-            x * MapSim.CELL_SIZE, 
-            y * MapSim.CELL_SIZE, 
-            MapSim.CELL_SIZE, 
-            MapSim.CELL_SIZE
+            x * MapSim.cellSize, 
+            y * MapSim.cellSize, 
+            MapSim.cellSize, 
+            MapSim.cellSize
           );
         }
       }
@@ -290,7 +366,7 @@ class MapSim {
       const currentX = predator.getCurrentX();
       const currentY = predator.getCurrentY();
       
-      if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() > 2) {
+      if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() > MapSim.reproductionThreshold) {
         this.newPredators[currentX][currentY] = true;
         predator.setEnergy(0);
       }
@@ -301,16 +377,16 @@ class MapSim {
         this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
         this.ctx.strokeStyle = 'black';
         this.ctx.fillRect(
-          currentX * MapSim.CELL_SIZE,
-          currentY * MapSim.CELL_SIZE,
-          MapSim.CELL_SIZE,
-          MapSim.CELL_SIZE
+          currentX * MapSim.cellSize,
+          currentY * MapSim.cellSize,
+          MapSim.cellSize,
+          MapSim.cellSize
         );
         this.ctx.strokeRect(
-          currentX * MapSim.CELL_SIZE,
-          currentY * MapSim.CELL_SIZE,
-          MapSim.CELL_SIZE,
-          MapSim.CELL_SIZE
+          currentX * MapSim.cellSize,
+          currentY * MapSim.cellSize,
+          MapSim.cellSize,
+          MapSim.cellSize
         );
       }
     }
@@ -321,7 +397,7 @@ class MapSim {
       const currentX = prey.getCurrentX();
       const currentY = prey.getCurrentY();
       
-      if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > 2) {
+      if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > MapSim.reproductionThreshold) {
         this.newPreys[currentX][currentY] = true;
         prey.setEnergy(0);
       }
@@ -332,16 +408,16 @@ class MapSim {
         this.ctx.fillStyle = 'rgba(0, 0, 255, 0.7)';
         this.ctx.strokeStyle = 'black';
         this.ctx.fillRect(
-          currentX * MapSim.CELL_SIZE,
-          currentY * MapSim.CELL_SIZE,
-          MapSim.CELL_SIZE,
-          MapSim.CELL_SIZE
+          currentX * MapSim.cellSize,
+          currentY * MapSim.cellSize,
+          MapSim.cellSize,
+          MapSim.cellSize
         );
         this.ctx.strokeRect(
-          currentX * MapSim.CELL_SIZE,
-          currentY * MapSim.CELL_SIZE,
-          MapSim.CELL_SIZE,
-          MapSim.CELL_SIZE
+          currentX * MapSim.cellSize,
+          currentY * MapSim.cellSize,
+          MapSim.cellSize,
+          MapSim.cellSize
         );
       }
     }

@@ -3,10 +3,10 @@ class Predator {
 
     static map = null;
     static INITIAL_ENERGY = 0;
-    static INITIAL_LIFE = 30;
+    static initialLife = 30;
 
     constructor(initialX, initialY){
-        this.lifeSpan = Predator.INITIAL_LIFE;
+        this.lifeSpan = Predator.initialLife;
         this.energy = Predator.INITIAL_ENERGY;
         this.currentX = initialX;
         this.currentY = initialY;
@@ -18,7 +18,7 @@ class Predator {
     }
 
     static getInitialLife(){
-        return Predator.INITIAL_LIFE;
+        return Predator.initialLife;
     }
 
     static getInitialEnergy(){
