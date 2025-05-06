@@ -159,8 +159,8 @@ class MapSim {
     reproThresholdInput.type = 'number';
     reproThresholdInput.id = 'repro-threshold';
     reproThresholdInput.min = '1';
-    reproThresholdInput.max = '10';
-    reproThresholdInput.value = '2'; // Current default in the code
+    reproThresholdInput.max = '50';
+    reproThresholdInput.value = String(MapSim.reproductionThreshold);
     reproThresholdInput.style.width = '100%';
     reproThresholdInput.style.marginBottom = '15px';
     configDiv.appendChild(reproThresholdInput);
@@ -175,8 +175,8 @@ class MapSim {
     grassSpeedInput.type = 'number';
     grassSpeedInput.id = 'grass-speed';
     grassSpeedInput.min = '1';
-    grassSpeedInput.max = '20';
-    grassSpeedInput.value = '10'; // Current value in Grass.js
+    grassSpeedInput.max = '50';
+    grassSpeedInput.value = String(Grass.growthRate);
     grassSpeedInput.style.width = '100%';
     grassSpeedInput.style.marginBottom = '20px';
     configDiv.appendChild(grassSpeedInput);

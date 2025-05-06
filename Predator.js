@@ -18,7 +18,7 @@ class Predator {
     }
 
     static getInitialLife(){
-        return Predator.INITIAL_LIFE;
+        return Predator.initialLife;
     }
 
     static getInitialEnergy(){

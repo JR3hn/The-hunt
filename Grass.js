@@ -3,7 +3,7 @@ class Grass {
 
     constructor(map) {
         this.nextGrow = 0;
-        this.nutrition = 2;
+        this.nutrition = 1;
         this.map = map;
     }
 
