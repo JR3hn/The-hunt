@@ -48,7 +48,8 @@
     
     <!-- MapSim modul -->
     <script type="module">
-        import MapSim from './MapSim.js';
+        const timestamp = new Date().getTime();
+        import(`./MapSim.js?v=${timestamp}`);
         
         // När sidan har laddats
         window.addEventListener('DOMContentLoaded', () => {
