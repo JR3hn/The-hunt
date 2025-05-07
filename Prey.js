@@ -3,7 +3,7 @@ import Grass from './Grass.js';
 class Prey {
   static map = null;
   static INITIAL_ENERGY = 0;
-  static reproductionThreshold = 2;
+  static reproductionThreshold = 1;
   static initialLife = 30;
   
   constructor(x, y) {
@@ -67,8 +67,8 @@ class Prey {
   escape() {
     this.predatorNearby = false;
     
-    for (let i = -2; i <= 2; i++) {
-      for (let j = -2; j <= 2; j++) {
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
         const targetX = this.currentX + i;
         const targetY = this.currentY + j;
         
@@ -165,11 +165,20 @@ class Prey {
   
   static procreate(x, y) {
     Prey.map.incrementPreyBorn();
-    if (Prey.map.inBounds(x - 4, y - 4)) {
-      return new Prey(x - 4, y - 4);
-    } else {
-      return new Prey(x + 4, y + 4);
+    // Generate random offsets between -4 and +4
+    const offsetX = Math.floor(Math.random() * 9) - 4;
+    const offsetY = Math.floor(Math.random() * 9) - 4;
+    
+    let newX = x + offsetX;
+    let newY = y + offsetY;
+
+    // Ensure coordinates are within map bounds
+    if (!Prey.map.inBounds(newX, newY)) {
+      newX = Math.max(0, Math.min(newX, Prey.map.getWidth() - 1));
+      newY = Math.max(0, Math.min(newY, Prey.map.getHeight() - 1));
     }
+
+    return new Prey(newX, newY);
   }
   
   eat() {

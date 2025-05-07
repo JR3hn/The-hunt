@@ -3,9 +3,9 @@ class Predator {
 
     static map = null;
     static INITIAL_ENERGY = 0;
-    static reproductionThreshold = 2;
+    static reproductionThreshold = 1;
     static initialLife = 30;
-
+s
     constructor(initialX, initialY){
         this.lifeSpan = Predator.initialLife;
         this.energy = Predator.INITIAL_ENERGY;
@@ -59,32 +59,41 @@ class Predator {
     }
 
     static procreate(x, y) {
-        Predator.map.incrementPredatorBorn();
-        if (Predator.map.inBounds(x - 1, y - 1)){
-            return new Predator(x - 1, y - 1);
-        } else {
-            return new Predator(x + 1, y + 1);
-        }
+      Predator.map.incrementPredatorBorn();
+      // Generate random offsets between -4 and +4
+      const offsetX = Math.floor(Math.random() * 9) - 4;
+      const offsetY = Math.floor(Math.random() * 9) - 4;
+
+      let newX = x + offsetX;
+      let newY = y + offsetY;
+
+      // Ensure coordinates are within map bounds
+      if (!Predator.map.inBounds(newX, newY)) {
+        newX = Math.max(0, Math.min(newX, Predator.map.getWidth() - 1));
+        newY = Math.max(0, Math.min(newY, Predator.map.getHeight() - 1));
+      }
+
+      return new Predator(newX, newY);
     }
 
     kill(prey){
-        if (prey && !prey.isDead()) {
-        prey.killed();
-        this.energy += 2;
-        //this.lifeSpan++;
-        }
+      if (prey && !prey.isDead()) {
+      prey.killed();
+      this.energy += 2;
+      //this.lifeSpan++;
+      }
     }
 
     hunt(){
-        const prey = this.search();
-        if (prey) {
-          this.signalOtherPredators(this.findFriends(), prey);
-          this.moveToPrey(prey);
-          this.hasActed = true;
-        } else {
-          this.moveRandom();
-          this.hasActed = true;
-        }
+      const prey = this.search();
+      if (prey) {
+        this.signalOtherPredators(this.findFriends(), prey);
+        this.moveToPrey(prey);
+        this.hasActed = true;
+      } else {
+        this.moveRandom();
+        this.hasActed = true;
+      }
     }
 
     findFriends() {
@@ -147,22 +156,22 @@ class Predator {
 
 
     rest() {
-        this.energy += 1;
-        this.lifeSpan--;
+      this.energy += 1;
+      this.lifeSpan--;
     }
 
     moveRandom() {
-        //consumeEnergy(1);
-        let newX = this.currentX + Math.floor(Math.random() * 3) - 1;
-        let newY = this.currentY + Math.floor(Math.random() * 3) - 1;
-    
-        newX = Math.max(0, Math.min(newX, Predator.map.getWidth() - 1));
-        newY = Math.max(0, Math.min(newY, Predator.map.getHeight() - 1));
-    
-        Predator.map.moveEntity(this.currentX, this.currentY, newX, newY, this);
-    
-        this.currentX = newX;
-        this.currentY = newY;
+      //consumeEnergy(1);
+      let newX = this.currentX + Math.floor(Math.random() * 3) - 1;
+      let newY = this.currentY + Math.floor(Math.random() * 3) - 1;
+  
+      newX = Math.max(0, Math.min(newX, Predator.map.getWidth() - 1));
+      newY = Math.max(0, Math.min(newY, Predator.map.getHeight() - 1));
+  
+      Predator.map.moveEntity(this.currentX, this.currentY, newX, newY, this);
+  
+      this.currentX = newX;
+      this.currentY = newY;
     }
 
     moveToPrey(prey) {
@@ -207,7 +216,7 @@ class Predator {
     turn() {
         if (!this.hasActed) {
           const friends = this.findFriends();
-          if (this.energy >= Predator.reproductionThreshold && friends.length > 0){
+          if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.5){
             this.moveToFriend(friends[0]);
             this.mateOtherPredators(friends[0])
           } else {
