@@ -20,7 +20,7 @@ async function loadModules() {
       this.updateInterval = 50; // milliseconds
       this.lastUpdate = 0;
 
-      this.lastPredatorCount = 1200;
+      this.lastPredatorCount = 1000;
       this.lastPreyCount = 2000;
       this.lastCellSize = MapSim.cellSize;
       this.lastReproductionThreshold = Predator.reproductionThreshold;
@@ -41,7 +41,7 @@ async function loadModules() {
       const mapWidth = Math.floor(this.canvas.width / MapSim.cellSize);
       const mapHeight = Math.floor(this.canvas.height / MapSim.cellSize);
 
-      MapSim.map = new Map(mapWidth, mapHeight);
+      MapSim.map = new Map(mapWidth, mapHeight, Grass);
       Predator.setMap(MapSim.map);
       Prey.setMap(MapSim.map);
 

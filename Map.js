@@ -1,9 +1,5 @@
-import Grass from './Grass.js';
-import Predator from './Predator.js';
-import Prey from './Prey.js'; 
-
 class Map {
-    constructor(width, height) {
+    constructor(width, height, Grass) {
         this.grid = Array(width).fill().map(() => Array(height).fill().map(() => []));
         this.predators = [];
         this.prey = [];
@@ -17,6 +13,8 @@ class Map {
         this.grassEaten = 0;
         this.grassGrown = 0;
         this.preyDead = 0;
+
+        this.Grass = Grass;
         
     }
       
@@ -184,7 +182,7 @@ class Map {
           }
         }
         
-        this.grid[x][y].push(new Grass(this));
+        this.grid[x][y].push(new this.Grass(this));
         return true;
     }
     
