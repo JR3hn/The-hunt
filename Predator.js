@@ -3,6 +3,7 @@ class Predator {
 
     static map = null;
     static INITIAL_ENERGY = 0;
+    static reproductionThreshold = 2;
     static initialLife = 30;
 
     constructor(initialX, initialY){
@@ -110,8 +111,10 @@ class Predator {
     signalOtherPredators(predators, prey) {
       if (predators) {
         for (const predator of predators) {
-          predator.moveToPrey(prey);
-          predator.hasActed = true;
+          if (!predator.hasActed){
+            predator.moveToPrey(prey);
+            predator.hasActed = true;
+          }
         }
       }
     }
@@ -174,9 +177,33 @@ class Predator {
         Predator.map.moveEntity(oldX, oldY, this.currentX, this.currentY, this);
     }
 
+    moveToFriend(predator) {
+      //consumeEnergy(1);
+      const oldX = this.currentX;
+      const oldY = this.currentY;
+      
+      if (predator.getCurrentX() === this.currentX && predator.getCurrentY() === this.currentY) {
+        return;
+      }
+  
+      if (predator.getCurrentX() > this.currentX) this.currentX++;
+      else if (predator.getCurrentX() < this.currentX) this.currentX--;
+  
+      if (predator.getCurrentY() > this.currentY) this.currentY++;
+      else if (predator.getCurrentY() < this.currentY) this.currentY--;
+    
+      // Update position on the map
+      Predator.map.moveEntity(oldX, oldY, this.currentX, this.currentY, this);
+  }
+
     turn() {
         if (!this.hasActed) {
-          this.hunt();
+          const friends = this.findFriends();
+          if (this.energy >= Predator.reproductionThreshold && friends.length > 1){
+            this.moveToFriend(friends[0]);
+          } else {
+            this.hunt();
+          }
         }
         this.age();
     }

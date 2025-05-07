@@ -7,13 +7,12 @@ class MapSim {
   static cellSize = 7;
   static map = null;
   static currentTurn = 0;
-  static reproductionThreshold = 2;
   
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext('2d');
     this.isPaused = false;
-    this.updateInterval = 300; // milliseconds
+    this.updateInterval = 100; // milliseconds
     this.lastUpdate = 0;
 
     this.lastPredatorCount = 800;
@@ -208,7 +207,8 @@ class MapSim {
       MapSim.cellSize = cellSize;
       Predator.initialLife = predatorLife;
       Prey.initialLife = preyLife;
-      MapSim.reproductionThreshold = reproThreshold;
+      Predator.reproductionThreshold = reproThreshold;
+      Prey.reproductionThreshold = reproThreshold;
       Grass.growthRate = grassSpeed;
 
       // Uppdatera cellstorleken och återinitiera kartan
@@ -366,7 +366,7 @@ class MapSim {
       const currentX = predator.getCurrentX();
       const currentY = predator.getCurrentY();
       
-      if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() > MapSim.reproductionThreshold) {
+      if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() > Predator.reproductionThreshold) {
         this.newPredators[currentX][currentY] = true;
         predator.setEnergy(0);
       }
@@ -397,7 +397,7 @@ class MapSim {
       const currentX = prey.getCurrentX();
       const currentY = prey.getCurrentY();
       
-      if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > MapSim.reproductionThreshold) {
+      if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > Prey.reproductionThreshold) {
         this.newPreys[currentX][currentY] = true;
         prey.setEnergy(0);
       }
