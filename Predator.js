@@ -5,7 +5,7 @@ class Predator {
     static INITIAL_ENERGY = 0;
     static reproductionThreshold = 1;
     static initialLife = 30;
-s
+
     constructor(initialX, initialY){
         this.lifeSpan = Predator.initialLife;
         this.energy = Predator.INITIAL_ENERGY;
