@@ -215,7 +215,7 @@ class Predator {
     turn() {
         if (!this.hasActed) {
           const friends = this.findFriends();
-          if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.5){
+          if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.2){
             this.moveToFriend(friends[0]);
             this.mateOtherPredators(friends[0])
           } else {
