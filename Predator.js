@@ -78,7 +78,7 @@ class Predator {
     kill(prey){
       if (prey && !prey.isDead()) {
       prey.killed();
-      this.energy += 3;
+      this.energy += 5;
       //this.lifeSpan++;
       }
     }
@@ -198,10 +198,6 @@ class Predator {
       const oldX = this.currentX;
       const oldY = this.currentY;
       
-      if (predator.getCurrentX() === this.currentX && predator.getCurrentY() === this.currentY) {
-        return;
-      }
-  
       if (predator.getCurrentX() > this.currentX) this.currentX++;
       else if (predator.getCurrentX() < this.currentX) this.currentX--;
   
