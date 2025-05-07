@@ -1,4 +1,3 @@
-import Prey from './Prey.js'; 
 class Predator {
 
     static map = null;
@@ -79,8 +78,7 @@ class Predator {
     kill(prey){
       if (prey && !prey.isDead()) {
       prey.killed();
-      this.energy += 3;
-      //this.lifeSpan++;
+      this.energy += 1;
       }
     }
 
@@ -137,16 +135,32 @@ class Predator {
     }
 
     search() {
-      for (let i = -2; i <= 2; i++) {
-        for (let j = -2; j <= 2; j++) {
-          const targetX = this.currentX + i;
-          const targetY = this.currentY + j;
-    
-          if (Predator.map.inBounds(targetX, targetY)) {
-            for (const entity of Predator.map.getEntitiesAt(targetX, targetY)) {
-              if (entity.constructor.name === 'Prey' && !entity.isDead()) {
-                return entity;
-              }
+      // Check current cell
+      for (const entity of Predator.map.getEntitiesAt(this.currentX, this.currentY)) {
+        if (entity.constructor.name === 'Prey' && !entity.isDead()) {
+          return entity;
+        }
+      }
+      // Create shuffled list of offsets for randomizing
+      const offsets = [];
+      for (let i = -3; i <= 3; i++) {
+        for (let j = -3; j <= 3; j++) {
+          if (i !== 0 || j !== 0) offsets.push([i, j]);
+        }
+      }
+      // Shuffle offsets
+      for (let k = offsets.length - 1; k > 0; k--) {
+        const l = Math.floor(Math.random() * (k + 1));
+        [offsets[k], offsets[l]] = [offsets[l], offsets[k]];
+      }
+      // Search in randomized order
+      for (const [i, j] of offsets) {
+        const targetX = this.currentX + i;
+        const targetY = this.currentY + j;
+        if (Predator.map.inBounds(targetX, targetY)) {
+          for (const entity of Predator.map.getEntitiesAt(targetX, targetY)) {
+            if (entity.constructor.name === 'Prey' && !entity.isDead()) {
+              return entity;
             }
           }
         }
@@ -198,11 +212,7 @@ class Predator {
       //consumeEnergy(1);
       const oldX = this.currentX;
       const oldY = this.currentY;
-      
-      if (predator.getCurrentX() === this.currentX && predator.getCurrentY() === this.currentY) {
-        return;
-      }
-  
+
       if (predator.getCurrentX() > this.currentX) this.currentX++;
       else if (predator.getCurrentX() < this.currentX) this.currentX--;
   
@@ -214,16 +224,19 @@ class Predator {
   }
 
     turn() {
-        if (!this.hasActed) {
-          const friends = this.findFriends();
-          if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.5){
-            this.moveToFriend(friends[0]);
-            this.mateOtherPredators(friends[0])
-          } else {
-            this.hunt();
-          }
+      if (!this.hasActed) {
+        const friends = this.findFriends();
+        if (friends.length > 0 && this.energy >= Predator.reproductionThreshold){
+          const randomIndex = Math.floor(Math.random() * friends.length);
+          const chosenMate = friends[randomIndex];
+          this.moveToFriend(chosenMate);
+          this.mateOtherPredators(chosenMate);
+          this.hasActed = true;
+        } else {
+          this.hunt()
         }
-        this.age();
+      } 
+      this.age();
     }
 }
     

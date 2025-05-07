@@ -1,5 +1,3 @@
-import Grass from './Grass.js';
-
 class Prey {
   static map = null;
   static INITIAL_ENERGY = 0;
@@ -67,8 +65,8 @@ class Prey {
   escape() {
     this.predatorNearby = false;
     
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
+    for (let i = -2; i <= 2; i++) {
+      for (let j = -2; j <= 2; j++) {
         const targetX = this.currentX + i;
         const targetY = this.currentY + j;
         
@@ -90,11 +88,16 @@ class Prey {
       let escapeX = this.currentX;
       let escapeY = this.currentY;
       
-      const closestPredator = this.findClosestPredator();
-      if (closestPredator.getCurrentX() > this.currentX) escapeX--;
-      else if (closestPredator.getCurrentX() < this.currentX) escapeX++;
-      if (closestPredator.getCurrentY() > this.currentY) escapeY--;
-      else if (closestPredator.getCurrentY() < this.currentY) escapeY++;
+      if (Math.random() < 0.4) { // 40% chance to choose random direction
+        escapeX = this.currentX + (Math.random() < 0.5 ? -1 : 1);
+        escapeY = this.currentY + (Math.random() < 0.5 ? -1 : 1);
+      } else {
+        const closestPredator = this.findClosestPredator();
+        if (closestPredator.getCurrentX() > this.currentX) escapeX--;
+        else if (closestPredator.getCurrentX() < this.currentX) escapeX++;
+        if (closestPredator.getCurrentY() > this.currentY) escapeY--;
+        else if (closestPredator.getCurrentY() < this.currentY) escapeY++;
+      }
       
       if (Prey.map.inBounds(escapeX, escapeY)) {
         Prey.map.moveEntity(this.currentX, this.currentY, escapeX, escapeY, this);
