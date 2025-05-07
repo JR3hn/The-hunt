@@ -106,7 +106,7 @@ async function loadModules() {
       predatorInput.type = 'number';
       predatorInput.id = 'predator-count';
       predatorInput.min = '0';
-      predatorInput.max = '1000';
+      predatorInput.max = '10000';
       predatorInput.value = String(this.lastPredatorCount);
       predatorInput.style.width = '100%';
       predatorInput.style.marginBottom = '15px';
@@ -122,7 +122,7 @@ async function loadModules() {
       preyInput.type = 'number';
       preyInput.id = 'prey-count';
       preyInput.min = '0';
-      preyInput.max = '2000';
+      preyInput.max = '30000';
       preyInput.value = String(this.lastPreyCount);
       preyInput.style.width = '100%';
       preyInput.style.marginBottom = '20px';
@@ -170,7 +170,7 @@ async function loadModules() {
       reproThresholdInput.type = 'number';
       reproThresholdInput.id = 'repro-threshold';
       reproThresholdInput.min = '1';
-      reproThresholdInput.max = '50';
+      reproThresholdInput.max = '100';
       reproThresholdInput.value = String(this.lastReproductionThreshold);
       reproThresholdInput.style.width = '100%';
       reproThresholdInput.style.marginBottom = '15px';
@@ -186,7 +186,7 @@ async function loadModules() {
       grassSpeedInput.type = 'number';
       grassSpeedInput.id = 'grass-speed';
       grassSpeedInput.min = '1';
-      grassSpeedInput.max = '50';
+      grassSpeedInput.max = '200';
       grassSpeedInput.value = String(Grass.growthRate);
       grassSpeedInput.style.width = '100%';
       grassSpeedInput.style.marginBottom = '20px';
@@ -331,6 +331,8 @@ async function loadModules() {
         for (let y = 0; y < MapSim.map.getHeight(); y++) {
           const grass = MapSim.map.getGrassAt(x, y);
           if (grass) {
+            // Update the growthrate for all grass objects since they do not change
+            grass.updateGrowthRate();
             grass.turn();
             // Make sure to access getNutrition only if grass exists
             if (grass.getNutrition() >= 1) {

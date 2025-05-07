@@ -5,6 +5,7 @@ class Grass {
         this.nextGrow = 0;
         this.nutrition = 1;
         this.map = map;
+        this.instanceGrowthRate = Grass.growthRate;
     }
 
     getNextGrow(){
@@ -21,12 +22,18 @@ class Grass {
 
     turn(){
         this.nextGrow++;
-        if (this.nextGrow % Grass.growthRate === 0){
+        if (this.nextGrow % this.instanceGrowthRate === 0 && this.nutrition <= 2){
             this.nutrition++;
             this.nextGrow = 0;
             this.map.incrementGrassGrown();
         }
     }
+
+    // Add this method
+    updateGrowthRate() {
+        this.instanceGrowthRate = Grass.growthRate;
+    }
+
     consume(){
         if (this.nutrition > 0){
             this.nutrition--;
