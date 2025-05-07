@@ -107,7 +107,7 @@ class Predator {
     
           if (Predator.map.inBounds(targetX, targetY)) {
             for (const entity of Predator.map.getEntitiesAt(targetX, targetY)) {
-              if (entity instanceof Predator) {
+              if (entity.constructor.name === 'Predator') {
                 friends.push(entity);
               }
             }
@@ -144,7 +144,7 @@ class Predator {
     
           if (Predator.map.inBounds(targetX, targetY)) {
             for (const entity of Predator.map.getEntitiesAt(targetX, targetY)) {
-              if (entity instanceof Prey && !entity.isDead()) {
+              if (entity.constructor.name === 'Prey' && !entity.isDead()) {
                 return entity;
               }
             }

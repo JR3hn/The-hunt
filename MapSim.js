@@ -1,5 +1,6 @@
 let MapSim;
 
+//Load with cache busting
 async function loadModules() {
   const Map = (await import(`./Map.js?v=${window.__APP_VERSION}`)).default;
   const Predator = (await import(`./Predator.js?v=${window.__APP_VERSION}`)).default;
@@ -11,6 +12,7 @@ async function loadModules() {
     static map = null;
     static currentTurn = 0;
 
+    // Creates the canvas with everything that is needed
     constructor(canvasId) {
       this.canvas = document.getElementById(canvasId);
       this.ctx = this.canvas.getContext('2d');
@@ -18,7 +20,7 @@ async function loadModules() {
       this.updateInterval = 50; // milliseconds
       this.lastUpdate = 0;
 
-      this.lastPredatorCount = 800;
+      this.lastPredatorCount = 1000;
       this.lastPreyCount = 2000;
       this.lastCellSize = MapSim.cellSize;
       this.lastReproductionThreshold = Predator.reproductionThreshold;
@@ -34,6 +36,7 @@ async function loadModules() {
       this.showConfigDialog();
     }
 
+    // Creates the map
     initializeMap() {
       const mapWidth = Math.floor(this.canvas.width / MapSim.cellSize);
       const mapHeight = Math.floor(this.canvas.height / MapSim.cellSize);
@@ -55,6 +58,7 @@ async function loadModules() {
       }
     }
 
+    // Show the config dialog before starting a simulation
     showConfigDialog() {
       const existingDialog = document.getElementById('config-dialog');
       if (existingDialog) {
@@ -240,6 +244,7 @@ async function loadModules() {
       document.body.appendChild(configDiv);
     }
 
+    // Adds all the starting entities
     initializeEntities(predatorCount, preyCount, mapWidth, mapHeight) {
       // Add predators
       for (let i = 0; i < predatorCount; i++) {
@@ -256,6 +261,7 @@ async function loadModules() {
       }
     }
 
+    // Creates all the controls for the user
     setupControls() {
       const controlsDiv = document.getElementById('controls');
 
@@ -299,10 +305,12 @@ async function loadModules() {
       controlsDiv.appendChild(resetButton);
     }
 
+    // Starts the animation
     start() {
       this.animate(performance.now());
     }
 
+    // Animates each frame after the other
     animate(timestamp) {
       this.animationId = requestAnimationFrame((timestamp) => this.animate(timestamp));
 
@@ -312,6 +320,7 @@ async function loadModules() {
       }
     }
 
+    // Updates each frame
     update() {
       MapSim.currentTurn++;
 

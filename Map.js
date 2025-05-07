@@ -20,7 +20,6 @@ class Map {
         
     }
       
-
     incrementPredatorBorn() {
         this.predatorBorn++;
     }
@@ -93,11 +92,11 @@ class Map {
     addEntityAt(x, y, entity) {
       if (this.inBounds(x, y)) {
         this.grid[x][y].push(entity);
-        if (entity instanceof Predator) {
+        if (entity.constructor.name === 'Predator') {
           this.predators.push(entity);
           this.predatorCount[x][y]++;
         }
-        if (entity instanceof Prey) {
+        if (entity.constructor.name === 'Prey') {
           this.prey.push(entity);
           this.preyCount[x][y]++;
         }
@@ -111,14 +110,14 @@ class Map {
           const index = this.grid[x][y].indexOf(entity);
           if (index !== -1) {
             this.grid[x][y].splice(index, 1);
-            if (entity instanceof Predator) {
+            if (entity.constructor.name === 'Predator') {
               const predatorIndex = this.predators.indexOf(entity);
               if (predatorIndex !== -1) {
                 this.predators.splice(predatorIndex, 1);
               }
               this.predatorCount[x][y]--;
             }
-            if (entity instanceof Prey) {
+            if (entity.constructor.name === 'Prey') {
               const preyIndex = this.prey.indexOf(entity);
               if (preyIndex !== -1) {
                 this.prey.splice(preyIndex, 1);
@@ -138,10 +137,10 @@ class Map {
           this.grid[fromX][fromY].splice(index, 1);
           this.grid[toX][toY].push(entity);
           
-          if (entity instanceof Predator) {
+          if (entity.constructor.name === 'Predator') {
             this.predatorCount[fromX][fromY]--;
             this.predatorCount[toX][toY]++;
-          } else if (entity instanceof Prey) {
+          } else if (entity.constructor.name === 'Prey') {
             this.preyCount[fromX][fromY]--;
             this.preyCount[toX][toY]++;
           }
@@ -180,7 +179,7 @@ class Map {
         }
         
         for (const object of this.grid[x][y]) {
-          if (object instanceof Grass) {
+          if (object.constructor.name === 'Grass') {
             return false;
           }
         }
@@ -196,7 +195,7 @@ class Map {
       
       for (let i = 0; i < this.grid[x][y].length; i++) {
         const object = this.grid[x][y][i];
-        if (object instanceof Grass) {
+        if (object.constructor.name === 'Grass') {
           this.grid[x][y].splice(i, 1);
           return true;
         }
@@ -207,7 +206,7 @@ class Map {
     
     getGrassAt(x, y) {
       for (const object of this.grid[x][y]) {
-        if (object instanceof Grass) {
+        if (object.constructor.name === 'Grass') {
           return object;
         }
       }
@@ -216,7 +215,7 @@ class Map {
     
     checkForGrassAt(x, y) {
       for (const object of this.grid[x][y]) {
-        if (object instanceof Grass) {
+        if (object.constructor.name === 'Grass') {
           return true;
         }
       }
