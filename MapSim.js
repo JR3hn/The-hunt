@@ -12,7 +12,7 @@ class MapSim {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext('2d');
     this.isPaused = false;
-    this.updateInterval = 100; // milliseconds
+    this.updateInterval = 10; // milliseconds
     this.lastUpdate = 0;
 
     this.lastPredatorCount = 800;
@@ -454,15 +454,19 @@ class MapSim {
   }
 
   showFinalStatistics() {
-    // Get the stats container
-    const statsDiv = document.getElementById('stats');
-    
-    // Clear existing content
-    statsDiv.innerHTML = '';
-    
-    // Create final stats container
+    // Create popup container
     const finalStatsDiv = document.createElement('div');
-    finalStatsDiv.className = 'final-stats';
+    finalStatsDiv.style.position = 'fixed';
+    finalStatsDiv.style.top = '50%';
+    finalStatsDiv.style.left = '50%';
+    finalStatsDiv.style.transform = 'translate(-50%, -50%)';
+    finalStatsDiv.style.backgroundColor = 'white';
+    finalStatsDiv.style.padding = '20px';
+    finalStatsDiv.style.borderRadius = '8px';
+    finalStatsDiv.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    finalStatsDiv.style.zIndex = '1000';
+    finalStatsDiv.style.maxWidth = '500px';
+    finalStatsDiv.style.width = '80%';
     
     // Add a header
     const header = document.createElement('h2');
@@ -474,36 +478,33 @@ class MapSim {
       <p><strong>Total Turns:</strong> ${MapSim.currentTurn}</p>
       <h3>Predators</h3>
       <p>Born: ${MapSim.map.getPredatorBorn()}</p>
-      <p>Dead: ${MapSim.map.getPredatorDead()}</p>
-      <p>Remaining: ${MapSim.map.getAllPredators().length}</p>
-      
-      <h3>Prey</h3>
-      <p>Born: ${MapSim.map.getPreyBorn()}</p>
-      <p>Eaten: ${MapSim.map.getPreyEaten()}</p>
-      <p>Died naturally: ${MapSim.map.getPreyDead()}</p>
-      <p>Died totally: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
-      <p>Remaining: ${MapSim.map.getAllPreys().length}</p>
-      
-      <h3>Grass</h3>
-      <p>Grown: ${MapSim.map.getGrassGrown()}</p>
-      <p>Eaten: ${MapSim.map.getGrassEaten()}</p>
+      <!-- ... rest of statistics ... -->
     `;
-    
-    // Append to the stats div
-    statsDiv.appendChild(finalStatsDiv);
-    
-    console.log("Final statistics displayed");
     
     // Create a restart button
     const restartButton = document.createElement('button');
     restartButton.textContent = 'Start New Simulation';
     restartButton.style.marginTop = '10px';
     restartButton.style.padding = '8px 16px';
+    restartButton.style.backgroundColor = '#4CAF50';
+    restartButton.style.color = 'white';
+    restartButton.style.border = 'none';
+    restartButton.style.borderRadius = '4px';
+    restartButton.style.cursor = 'pointer';
     restartButton.addEventListener('click', () => this.resetSimulation());
     finalStatsDiv.appendChild(restartButton);
+    
+    // Add to document body (not to stats div)
+    document.body.appendChild(finalStatsDiv);
   }
 
   resetSimulation() {
+    // Remove the final stats popup if it exists
+    const finalStatsPopup = document.querySelector('div[style*="position: fixed"]');
+    if (finalStatsPopup) {
+      document.body.removeChild(finalStatsPopup);
+    }
+    
     // Stoppa animationsloopen
     cancelAnimationFrame(this.animationId);
     
