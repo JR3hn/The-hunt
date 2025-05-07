@@ -52,6 +52,10 @@ class MapSim {
   }
 
   showConfigDialog() {
+    const existingDialog = document.getElementById('config-dialog');
+    if (existingDialog) {
+      document.body.removeChild(existingDialog);
+    }
     const configDiv = document.createElement('div');
     configDiv.id = 'config-dialog';
     configDiv.style.position = 'fixed';
@@ -159,7 +163,7 @@ class MapSim {
     reproThresholdInput.id = 'repro-threshold';
     reproThresholdInput.min = '1';
     reproThresholdInput.max = '50';
-    reproThresholdInput.value = String(MapSim.reproductionThreshold);
+    reproThresholdInput.value = String(Predator.reproductionThreshold);
     reproThresholdInput.style.width = '100%';
     reproThresholdInput.style.marginBottom = '15px';
     configDiv.appendChild(reproThresholdInput);
