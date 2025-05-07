@@ -48,15 +48,30 @@
     
     <!-- MapSim modul -->
     <script type="module">
-        import MapSim from './MapSim.js';
-        
-        // När sidan har laddats
-        window.addEventListener('DOMContentLoaded', () => {
-            // Initiera MapSim med canvas-id
-            const mapSim = new MapSim('simulation-canvas');
+        // When page has loaded
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Add meta tag to prevent caching
+            const meta = document.createElement('meta');
+            meta.httpEquiv = 'Cache-Control';
+            meta.content = 'no-cache, no-store, must-revalidate';
+            document.head.appendChild(meta);
             
-            // Starta simulationen
-            //mapSim.start();
+            // Force browser to reload all scripts
+            const timestamp = new Date().getTime();
+            
+            // Create a version object to be passed to modules
+            window.__APP_VERSION = timestamp;
+            
+            // Import with cache busting
+            try {
+                const MapSimModule = await import(`./MapSim.js?v=${timestamp}`);
+                const MapSimLoader = MapSimModule.default;
+                const MapSim = await MapSimLoader();  // Call the function to get the class
+                const mapSim = new MapSim('simulation-canvas');  // Now this will work
+            } catch (error) {
+                console.error("Failed to load simulation:", error);
+                document.body.innerHTML += `<div style="color:red">Error loading simulation: ${error.message}</div>`;
+            }
         });
     </script>
 </body>
