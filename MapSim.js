@@ -214,7 +214,7 @@ class MapSim {
       Predator.initialLife = predatorLife;
       Prey.initialLife = preyLife;
       Predator.reproductionThreshold = reproThreshold;
-      Prey.reproductionThreshold = reproThreshold;
+      Prey.reproductionThreshold = reproThreshold + 1;
       Grass.growthRate = grassSpeed;
 
       // Uppdatera cellstorleken och återinitiera kartan

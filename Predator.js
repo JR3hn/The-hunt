@@ -216,12 +216,12 @@ s
     turn() {
         if (!this.hasActed) {
           const friends = this.findFriends();
-          //if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.){
-          //  this.moveToFriend(friends[0]);
-          //  this.mateOtherPredators(friends[0])
-          //} else {
+          if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.5){
+            this.moveToFriend(friends[0]);
+            this.mateOtherPredators(friends[0])
+          } else {
             this.hunt();
-          //}
+          }
         }
         this.age();
     }
