@@ -388,7 +388,7 @@ async function loadModules() {
         const currentX = predator.getCurrentX();
         const currentY = predator.getCurrentY();
 
-        if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() > Predator.reproductionThreshold) {
+        if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() >= Predator.reproductionThreshold) {
           this.newPredators[currentX][currentY] = true;
           predator.setEnergy(1);
         }
@@ -419,7 +419,7 @@ async function loadModules() {
         const currentX = prey.getCurrentX();
         const currentY = prey.getCurrentY();
 
-        if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > Prey.reproductionThreshold) {
+        if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() >= Prey.reproductionThreshold) {
           this.newPreys[currentX][currentY] = true;
           prey.setEnergy(0);
         }

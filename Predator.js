@@ -3,7 +3,7 @@ class Predator {
     static map = null;
     static INITIAL_ENERGY = 0;
     static reproductionThreshold = 1;
-    static initialLife = 40;
+    static initialLife = 45;
 
     constructor(initialX, initialY){
         this.lifeSpan = Predator.initialLife;
@@ -97,8 +97,8 @@ class Predator {
 
     findFriends() {
       const friends = [];
-      for (let i = -3; i <= 3; i++) {
-        for (let j = -3; j <= 3; j++) {
+      for (let i = -2; i <= 2; i++) {
+        for (let j = -2; j <= 2; j++) {
           if (i === 0 && j === 0) continue;
     
           const targetX = this.currentX + i;
@@ -136,8 +136,16 @@ class Predator {
     }
 
     search() {
+      // Check current cell
+      for (const entity of Predator.map.getEntitiesAt(this.currentX, this.currentY)) {
+        if (entity.constructor.name === 'Prey' && !entity.isDead()) {
+          return entity;
+        }
+      }
+      // Search the surrounding area
       for (let i = -5; i <= 5; i++) {
         for (let j = -5; j <= 5; j++) {
+          if (i === 0 && j === 0) continue;
           const targetX = this.currentX + i;
           const targetY = this.currentY + j;
     
@@ -209,22 +217,19 @@ class Predator {
   }
 
     turn() {
-       //if (!this.hasActed) {
-       //  const friends = this.findFriends();
-       //  if (friends.length > 0 && this.energy >= Predator.reproductionThreshold){
-       //    const randomIndex = Math.floor(Math.random() * friends.length);
-       //    const chosenMate = friends[randomIndex];
-       //    if (chosenMate.getEnergy() >= Predator.reproductionThreshold) {
-       //      this.moveToFriend(chosenMate);
-       //      this.mateOtherPredators(chosenMate);
-       //      this.hasActed = true;
-       //    } 
-       //  }
-       //}
-        if (!this.hasActed) {
+      if (!this.hasActed) {
+        const friends = this.findFriends();
+        if (friends.length > 0 && this.energy >= Predator.reproductionThreshold && Math.random() < 0.3){
+          const randomIndex = Math.floor(Math.random() * friends.length);
+          const chosenMate = friends[randomIndex];
+          this.moveToFriend(chosenMate);
+          this.mateOtherPredators(chosenMate);
+          this.hasActed = true;
+        } else {
           this.hunt()
         }
-        this.age();
+      } 
+      this.age();
     }
 }
     
