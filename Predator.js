@@ -199,7 +199,7 @@ class Predator {
     turn() {
         if (!this.hasActed) {
           const friends = this.findFriends();
-          if (this.energy >= Predator.reproductionThreshold && friends.length > 1){
+          if (this.energy >= Predator.reproductionThreshold * 2 && friends.length > 0){
             this.moveToFriend(friends[0]);
           } else {
             this.hunt();
