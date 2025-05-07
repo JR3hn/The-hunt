@@ -141,18 +141,26 @@ class Predator {
           return entity;
         }
       }
-      // Search the surrounding area
+      // Create shuffled list of offsets for randomizing
+      const offsets = [];
       for (let i = -5; i <= 5; i++) {
         for (let j = -5; j <= 5; j++) {
-          if (i === 0 && j === 0) continue;
-          const targetX = this.currentX + i;
-          const targetY = this.currentY + j;
-    
-          if (Predator.map.inBounds(targetX, targetY)) {
-            for (const entity of Predator.map.getEntitiesAt(targetX, targetY)) {
-              if (entity.constructor.name === 'Prey' && !entity.isDead()) {
-                return entity;
-              }
+          if (i !== 0 || j !== 0) offsets.push([i, j]);
+        }
+      }
+      // Shuffle offsets
+      for (let k = offsets.length - 1; k > 0; k--) {
+        const l = Math.floor(Math.random() * (k + 1));
+        [offsets[k], offsets[l]] = [offsets[l], offsets[k]];
+      }
+      // Search in randomized order
+      for (const [i, j] of offsets) {
+        const targetX = this.currentX + i;
+        const targetY = this.currentY + j;
+        if (Predator.map.inBounds(targetX, targetY)) {
+          for (const entity of Predator.map.getEntitiesAt(targetX, targetY)) {
+            if (entity.constructor.name === 'Prey' && !entity.isDead()) {
+              return entity;
             }
           }
         }
