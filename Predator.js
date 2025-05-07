@@ -109,12 +109,13 @@ class Predator {
     }
 
     signalOtherPredators(predators, prey) {
-      if (predators) {
-        for (const predator of predators) {
-          if (!predator.hasActed){
+      if (predators && predators.length > 0) {
+        // Only signal one other predator (not all of them)
+        const randomIndex = Math.floor(Math.random() * predators.length);
+        const predator = predators[randomIndex];
+        if (!predator.hasActed) {
             predator.moveToPrey(prey);
             predator.hasActed = true;
-          }
         }
       }
     }
