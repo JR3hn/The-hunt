@@ -1,4 +1,3 @@
-import Prey from './Prey.js'; 
 class Predator {
 
     static map = null;
@@ -98,8 +97,8 @@ class Predator {
 
     findFriends() {
       const friends = [];
-      for (let i = -2; i <= 2; i++) {
-        for (let j = -2; j <= 2; j++) {
+      for (let i = -3; i <= 3; i++) {
+        for (let j = -3; j <= 3; j++) {
           if (i === 0 && j === 0) continue;
     
           const targetX = this.currentX + i;
@@ -137,8 +136,8 @@ class Predator {
     }
 
     search() {
-      for (let i = -4; i <= 4; i++) {
-        for (let j = -4; j <= 4; j++) {
+      for (let i = -5; i <= 5; i++) {
+        for (let j = -5; j <= 5; j++) {
           const targetX = this.currentX + i;
           const targetY = this.currentY + j;
     

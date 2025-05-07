@@ -20,7 +20,7 @@ async function loadModules() {
       this.updateInterval = 50; // milliseconds
       this.lastUpdate = 0;
 
-      this.lastPredatorCount = 1500;
+      this.lastPredatorCount = 1400;
       this.lastPreyCount = 2000;
       this.lastCellSize = MapSim.cellSize;
       this.lastReproductionThreshold = Predator.reproductionThreshold;

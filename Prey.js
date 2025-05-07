@@ -1,5 +1,3 @@
-import Grass from './Grass.js';
-
 class Prey {
   static map = null;
   static INITIAL_ENERGY = 0;
