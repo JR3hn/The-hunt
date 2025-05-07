@@ -1,558 +1,564 @@
-import Map from './Map.js';
-import Predator from './Predator.js';
-import Prey from './Prey.js';
-import Grass from './Grass.js';
+let MapSim;
 
-class MapSim {
-  static cellSize = 7;
-  static map = null;
-  static currentTurn = 0;
-  
-  constructor(canvasId) {
-    this.canvas = document.getElementById(canvasId);
-    this.ctx = this.canvas.getContext('2d');
-    this.isPaused = false;
-    this.updateInterval = 50; // milliseconds
-    this.lastUpdate = 0;
+async function loadModules() {
+  const Map = (await import(`./Map.js?v=${window.__APP_VERSION}`)).default;
+  const Predator = (await import(`./Predator.js?v=${window.__APP_VERSION}`)).default;
+  const Prey = (await import(`./Prey.js?v=${window.__APP_VERSION}`)).default;
+  const Grass = (await import(`./Grass.js?v=${window.__APP_VERSION}`)).default;
 
-    this.lastPredatorCount = 800;
-    this.lastPreyCount = 2000;
-    this.lastCellSize = MapSim.cellSize;
-    this.lastReproductionThreshold = Predator.reproductionThreshold;
-    
-    this.canvas.width = window.innerWidth - 20;
-    this.canvas.height = window.innerHeight - 150;
-    
-    this.initializeMap();
+  MapSim = class MapSim {
+    static cellSize = 7;
+    static map = null;
+    static currentTurn = 0;
 
-    this.setupControls();
-    this.animationId = null;
+    constructor(canvasId) {
+      this.canvas = document.getElementById(canvasId);
+      this.ctx = this.canvas.getContext('2d');
+      this.isPaused = false;
+      this.updateInterval = 50; // milliseconds
+      this.lastUpdate = 0;
 
-    this.showConfigDialog();
-  }
+      this.lastPredatorCount = 800;
+      this.lastPreyCount = 2000;
+      this.lastCellSize = MapSim.cellSize;
+      this.lastReproductionThreshold = Predator.reproductionThreshold;
 
-  initializeMap() {
-    const mapWidth = Math.floor(this.canvas.width / MapSim.cellSize);
-    const mapHeight = Math.floor(this.canvas.height / MapSim.cellSize);
-    
-    MapSim.map = new Map(mapWidth, mapHeight);
-    Predator.setMap(MapSim.map);
-    Prey.setMap(MapSim.map);
-    
-    this.newPredators = Array(mapWidth).fill().map(() => Array(mapHeight).fill(false));
-    this.deadPredators = [];
-    this.newPreys = Array(mapWidth).fill().map(() => Array(mapHeight).fill(false));
-    this.deadPreys = [];
-    
-    // Initialize grass
-    for (let x = 0; x < mapWidth; x++) {
-      for (let y = 0; y < mapHeight; y++) {
-        MapSim.map.addGrassAt(x, y);
-      }
-    }
-  }
+      this.canvas.width = window.innerWidth - 20;
+      this.canvas.height = window.innerHeight - 150;
 
-  showConfigDialog() {
-    const existingDialog = document.getElementById('config-dialog');
-    if (existingDialog) {
-      document.body.removeChild(existingDialog);
-    }
-    const configDiv = document.createElement('div');
-    configDiv.id = 'config-dialog';
-    configDiv.style.position = 'fixed';
-    configDiv.style.top = '50%';
-    configDiv.style.left = '50%';
-    configDiv.style.transform = 'translate(-50%, -50%)';
-    configDiv.style.backgroundColor = 'white';
-    configDiv.style.padding = '20px';
-    configDiv.style.borderRadius = '8px';
-    configDiv.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-    configDiv.style.zIndex = '1000';
-    configDiv.style.width = '300px';
-    
-    const header = document.createElement('h2');
-    header.textContent = 'Konfigurera Simulation';
-    configDiv.appendChild(header);
-
-    const cellSizeLabel = document.createElement('label');
-    cellSizeLabel.textContent = 'Cellstorlek (pixlar): ';
-    cellSizeLabel.setAttribute('for', 'cell-size');
-    configDiv.appendChild(cellSizeLabel);
-    
-    const cellSizeInput = document.createElement('input');
-    cellSizeInput.type = 'number';
-    cellSizeInput.id = 'cell-size';
-    cellSizeInput.min = '3';
-    cellSizeInput.max = '20';
-    cellSizeInput.value = String(this.lastCellSize);
-    cellSizeInput.style.width = '100%';
-    cellSizeInput.style.marginBottom = '20px';
-    configDiv.appendChild(cellSizeInput);
-    
-    // Predator input
-    const predatorLabel = document.createElement('label');
-    predatorLabel.textContent = 'Antal rovdjur: ';
-    predatorLabel.setAttribute('for', 'predator-count');
-    configDiv.appendChild(predatorLabel);
-    
-    const predatorInput = document.createElement('input');
-    predatorInput.type = 'number';
-    predatorInput.id = 'predator-count';
-    predatorInput.min = '0';
-    predatorInput.max = '1000';
-    predatorInput.value = String(this.lastPredatorCount);
-    predatorInput.style.width = '100%';
-    predatorInput.style.marginBottom = '15px';
-    configDiv.appendChild(predatorInput);
-    
-    // Prey input
-    const preyLabel = document.createElement('label');
-    preyLabel.textContent = 'Antal byten: ';
-    preyLabel.setAttribute('for', 'prey-count');
-    configDiv.appendChild(preyLabel);
-    
-    const preyInput = document.createElement('input');
-    preyInput.type = 'number';
-    preyInput.id = 'prey-count';
-    preyInput.min = '0';
-    preyInput.max = '2000';
-    preyInput.value = String(this.lastPreyCount);
-    preyInput.style.width = '100%';
-    preyInput.style.marginBottom = '20px';
-    configDiv.appendChild(preyInput);
-
-    // Predator lifespan
-    const predatorLifeLabel = document.createElement('label');
-    predatorLifeLabel.textContent = 'Livslängd rovdjur: ';
-    predatorLifeLabel.setAttribute('for', 'predator-life');
-    configDiv.appendChild(predatorLifeLabel);
-    
-    const predatorLifeInput = document.createElement('input');
-    predatorLifeInput.type = 'number';
-    predatorLifeInput.id = 'predator-life';
-    predatorLifeInput.min = '5';
-    predatorLifeInput.max = '100';
-    predatorLifeInput.value = String(Predator.initialLife);
-    predatorLifeInput.style.width = '100%';
-    predatorLifeInput.style.marginBottom = '15px';
-    configDiv.appendChild(predatorLifeInput);
-    
-    // Prey lifespan
-    const preyLifeLabel = document.createElement('label');
-    preyLifeLabel.textContent = 'Livslängd byten: ';
-    preyLifeLabel.setAttribute('for', 'prey-life');
-    configDiv.appendChild(preyLifeLabel);
-    
-    const preyLifeInput = document.createElement('input');
-    preyLifeInput.type = 'number';
-    preyLifeInput.id = 'prey-life';
-    preyLifeInput.min = '5';
-    preyLifeInput.max = '100';
-    preyLifeInput.value = String(Prey.initialLife);
-    preyLifeInput.style.width = '100%';
-    preyLifeInput.style.marginBottom = '15px';
-    configDiv.appendChild(preyLifeInput);
-    
-    // Reproduction threshold
-    const reproThresholdLabel = document.createElement('label');
-    reproThresholdLabel.textContent = 'Energitröskel för reproduktion: ';
-    reproThresholdLabel.setAttribute('for', 'repro-threshold');
-    configDiv.appendChild(reproThresholdLabel);
-    
-    const reproThresholdInput = document.createElement('input');
-    reproThresholdInput.type = 'number';
-    reproThresholdInput.id = 'repro-threshold';
-    reproThresholdInput.min = '1';
-    reproThresholdInput.max = '50';
-    reproThresholdInput.value = String(this.lastReproductionThreshold);
-    reproThresholdInput.style.width = '100%';
-    reproThresholdInput.style.marginBottom = '15px';
-    configDiv.appendChild(reproThresholdInput);
-    
-    // Grass growth speed
-    const grassSpeedLabel = document.createElement('label');
-    grassSpeedLabel.textContent = 'Hastighet för grästillväxt: ';
-    grassSpeedLabel.setAttribute('for', 'grass-speed');
-    configDiv.appendChild(grassSpeedLabel);
-    
-    const grassSpeedInput = document.createElement('input');
-    grassSpeedInput.type = 'number';
-    grassSpeedInput.id = 'grass-speed';
-    grassSpeedInput.min = '1';
-    grassSpeedInput.max = '50';
-    grassSpeedInput.value = String(Grass.growthRate);
-    grassSpeedInput.style.width = '100%';
-    grassSpeedInput.style.marginBottom = '20px';
-    configDiv.appendChild(grassSpeedInput);
-    
-    
-    // Start button
-    const startButton = document.createElement('button');
-    startButton.textContent = 'Starta Simulation';
-    startButton.style.width = '100%';
-    startButton.style.padding = '10px';
-    startButton.style.backgroundColor = '#4CAF50';
-    startButton.style.color = 'white';
-    startButton.style.border = 'none';
-    startButton.style.borderRadius = '4px';
-    startButton.style.cursor = 'pointer';
-    startButton.addEventListener('click', () => {
-      const predatorCount = parseInt(predatorInput.value, 10);
-      const preyCount = parseInt(preyInput.value, 10);
-      const cellSize = parseInt(cellSizeInput.value, 10);
-      const predatorLife = parseInt(predatorLifeInput.value, 10);
-      const preyLife = parseInt(preyLifeInput.value, 10);
-      const reproThreshold = parseInt(reproThresholdInput.value, 10);
-      const grassSpeed = parseInt(grassSpeedInput.value, 10);
-
-      this.lastPredatorCount = predatorCount;
-      this.lastPreyCount = preyCount;
-      this.lastCellSize = cellSize;
-      this.lastReproductionThreshold = reproThreshold;
-      
-      MapSim.cellSize = cellSize;
-      Predator.initialLife = predatorLife;
-      Prey.initialLife = preyLife;
-      Predator.reproductionThreshold = reproThreshold;
-      Prey.reproductionThreshold = reproThreshold + 1;
-      Grass.growthRate = grassSpeed;
-
-      // Uppdatera cellstorleken och återinitiera kartan
-      MapSim.cellSize = cellSize;
       this.initializeMap();
-      
-      // Initialize entities with user-configured values
+
+      this.setupControls();
+      this.animationId = null;
+
+      this.showConfigDialog();
+    }
+
+    initializeMap() {
       const mapWidth = Math.floor(this.canvas.width / MapSim.cellSize);
       const mapHeight = Math.floor(this.canvas.height / MapSim.cellSize);
-      this.initializeEntities(predatorCount, preyCount, mapWidth, mapHeight);
-      
-      // Remove the config dialog
-      document.body.removeChild(configDiv);
-      
-      // Start the simulation
-      this.start();
-    });
-    
-    configDiv.appendChild(startButton);
-    document.body.appendChild(configDiv);
-  }
 
-  initializeEntities(predatorCount, preyCount, mapWidth, mapHeight) {
-    // Add predators
-    for (let i = 0; i < predatorCount; i++) {
-      const randomX = Math.floor(Math.random() * mapWidth);
-      const randomY = Math.floor(Math.random() * mapHeight);
-      MapSim.map.addEntityAt(randomX, randomY, new Predator(randomX, randomY));
+      MapSim.map = new Map(mapWidth, mapHeight);
+      Predator.setMap(MapSim.map);
+      Prey.setMap(MapSim.map);
+
+      this.newPredators = Array(mapWidth).fill().map(() => Array(mapHeight).fill(false));
+      this.deadPredators = [];
+      this.newPreys = Array(mapWidth).fill().map(() => Array(mapHeight).fill(false));
+      this.deadPreys = [];
+
+      // Initialize grass
+      for (let x = 0; x < mapWidth; x++) {
+        for (let y = 0; y < mapHeight; y++) {
+          MapSim.map.addGrassAt(x, y);
+        }
+      }
     }
-    
-    // Add prey
-    for (let i = 0; i < preyCount; i++) {
-      const randomX = Math.floor(Math.random() * mapWidth);
-      const randomY = Math.floor(Math.random() * mapHeight);
-      MapSim.map.addEntityAt(randomX, randomY, new Prey(randomX, randomY));
+
+    showConfigDialog() {
+      const existingDialog = document.getElementById('config-dialog');
+      if (existingDialog) {
+        document.body.removeChild(existingDialog);
+      }
+      const configDiv = document.createElement('div');
+      configDiv.id = 'config-dialog';
+      configDiv.style.position = 'fixed';
+      configDiv.style.top = '50%';
+      configDiv.style.left = '50%';
+      configDiv.style.transform = 'translate(-50%, -50%)';
+      configDiv.style.backgroundColor = 'white';
+      configDiv.style.padding = '20px';
+      configDiv.style.borderRadius = '8px';
+      configDiv.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+      configDiv.style.zIndex = '1000';
+      configDiv.style.width = '300px';
+
+      const header = document.createElement('h2');
+      header.textContent = 'Konfigurera Simulation';
+      configDiv.appendChild(header);
+
+      const cellSizeLabel = document.createElement('label');
+      cellSizeLabel.textContent = 'Cellstorlek (pixlar): ';
+      cellSizeLabel.setAttribute('for', 'cell-size');
+      configDiv.appendChild(cellSizeLabel);
+
+      const cellSizeInput = document.createElement('input');
+      cellSizeInput.type = 'number';
+      cellSizeInput.id = 'cell-size';
+      cellSizeInput.min = '3';
+      cellSizeInput.max = '20';
+      cellSizeInput.value = String(this.lastCellSize);
+      cellSizeInput.style.width = '100%';
+      cellSizeInput.style.marginBottom = '20px';
+      configDiv.appendChild(cellSizeInput);
+
+      // Predator input
+      const predatorLabel = document.createElement('label');
+      predatorLabel.textContent = 'Antal rovdjur: ';
+      predatorLabel.setAttribute('for', 'predator-count');
+      configDiv.appendChild(predatorLabel);
+
+      const predatorInput = document.createElement('input');
+      predatorInput.type = 'number';
+      predatorInput.id = 'predator-count';
+      predatorInput.min = '0';
+      predatorInput.max = '1000';
+      predatorInput.value = String(this.lastPredatorCount);
+      predatorInput.style.width = '100%';
+      predatorInput.style.marginBottom = '15px';
+      configDiv.appendChild(predatorInput);
+
+      // Prey input
+      const preyLabel = document.createElement('label');
+      preyLabel.textContent = 'Antal byten: ';
+      preyLabel.setAttribute('for', 'prey-count');
+      configDiv.appendChild(preyLabel);
+
+      const preyInput = document.createElement('input');
+      preyInput.type = 'number';
+      preyInput.id = 'prey-count';
+      preyInput.min = '0';
+      preyInput.max = '2000';
+      preyInput.value = String(this.lastPreyCount);
+      preyInput.style.width = '100%';
+      preyInput.style.marginBottom = '20px';
+      configDiv.appendChild(preyInput);
+
+      // Predator lifespan
+      const predatorLifeLabel = document.createElement('label');
+      predatorLifeLabel.textContent = 'Livslängd rovdjur: ';
+      predatorLifeLabel.setAttribute('for', 'predator-life');
+      configDiv.appendChild(predatorLifeLabel);
+
+      const predatorLifeInput = document.createElement('input');
+      predatorLifeInput.type = 'number';
+      predatorLifeInput.id = 'predator-life';
+      predatorLifeInput.min = '5';
+      predatorLifeInput.max = '100';
+      predatorLifeInput.value = String(Predator.initialLife);
+      predatorLifeInput.style.width = '100%';
+      predatorLifeInput.style.marginBottom = '15px';
+      configDiv.appendChild(predatorLifeInput);
+
+      // Prey lifespan
+      const preyLifeLabel = document.createElement('label');
+      preyLifeLabel.textContent = 'Livslängd byten: ';
+      preyLifeLabel.setAttribute('for', 'prey-life');
+      configDiv.appendChild(preyLifeLabel);
+
+      const preyLifeInput = document.createElement('input');
+      preyLifeInput.type = 'number';
+      preyLifeInput.id = 'prey-life';
+      preyLifeInput.min = '5';
+      preyLifeInput.max = '100';
+      preyLifeInput.value = String(Prey.initialLife);
+      preyLifeInput.style.width = '100%';
+      preyLifeInput.style.marginBottom = '15px';
+      configDiv.appendChild(preyLifeInput);
+
+      // Reproduction threshold
+      const reproThresholdLabel = document.createElement('label');
+      reproThresholdLabel.textContent = 'Energitröskel för reproduktion: ';
+      reproThresholdLabel.setAttribute('for', 'repro-threshold');
+      configDiv.appendChild(reproThresholdLabel);
+
+      const reproThresholdInput = document.createElement('input');
+      reproThresholdInput.type = 'number';
+      reproThresholdInput.id = 'repro-threshold';
+      reproThresholdInput.min = '1';
+      reproThresholdInput.max = '50';
+      reproThresholdInput.value = String(this.lastReproductionThreshold);
+      reproThresholdInput.style.width = '100%';
+      reproThresholdInput.style.marginBottom = '15px';
+      configDiv.appendChild(reproThresholdInput);
+
+      // Grass growth speed
+      const grassSpeedLabel = document.createElement('label');
+      grassSpeedLabel.textContent = 'Hastighet för grästillväxt: ';
+      grassSpeedLabel.setAttribute('for', 'grass-speed');
+      configDiv.appendChild(grassSpeedLabel);
+
+      const grassSpeedInput = document.createElement('input');
+      grassSpeedInput.type = 'number';
+      grassSpeedInput.id = 'grass-speed';
+      grassSpeedInput.min = '1';
+      grassSpeedInput.max = '50';
+      grassSpeedInput.value = String(Grass.growthRate);
+      grassSpeedInput.style.width = '100%';
+      grassSpeedInput.style.marginBottom = '20px';
+      configDiv.appendChild(grassSpeedInput);
+
+
+      // Start button
+      const startButton = document.createElement('button');
+      startButton.textContent = 'Starta Simulation';
+      startButton.style.width = '100%';
+      startButton.style.padding = '10px';
+      startButton.style.backgroundColor = '#4CAF50';
+      startButton.style.color = 'white';
+      startButton.style.border = 'none';
+      startButton.style.borderRadius = '4px';
+      startButton.style.cursor = 'pointer';
+      startButton.addEventListener('click', () => {
+        const predatorCount = parseInt(predatorInput.value, 10);
+        const preyCount = parseInt(preyInput.value, 10);
+        const cellSize = parseInt(cellSizeInput.value, 10);
+        const predatorLife = parseInt(predatorLifeInput.value, 10);
+        const preyLife = parseInt(preyLifeInput.value, 10);
+        const reproThreshold = parseInt(reproThresholdInput.value, 10);
+        const grassSpeed = parseInt(grassSpeedInput.value, 10);
+
+        this.lastPredatorCount = predatorCount;
+        this.lastPreyCount = preyCount;
+        this.lastCellSize = cellSize;
+        this.lastReproductionThreshold = reproThreshold;
+
+        MapSim.cellSize = cellSize;
+        Predator.initialLife = predatorLife;
+        Prey.initialLife = preyLife;
+        Predator.reproductionThreshold = reproThreshold;
+        Prey.reproductionThreshold = reproThreshold;
+        Grass.growthRate = grassSpeed;
+
+        // Uppdatera cellstorleken och återinitiera kartan
+        MapSim.cellSize = cellSize;
+        this.initializeMap();
+
+        // Initialize entities with user-configured values
+        const mapWidth = Math.floor(this.canvas.width / MapSim.cellSize);
+        const mapHeight = Math.floor(this.canvas.height / MapSim.cellSize);
+        this.initializeEntities(predatorCount, preyCount, mapWidth, mapHeight);
+
+        // Remove the config dialog
+        document.body.removeChild(configDiv);
+
+        // Start the simulation
+        this.start();
+      });
+
+      configDiv.appendChild(startButton);
+      document.body.appendChild(configDiv);
     }
-  }
-  
-  setupControls() {
-    const controlsDiv = document.getElementById('controls');
-    
-    const pauseButton = document.createElement('button');
-    pauseButton.textContent = 'Pause';
-    pauseButton.addEventListener('click', () => {
-      this.isPaused = !this.isPaused;
-      pauseButton.textContent = this.isPaused ? 'Continue' : 'Pause';
-    });
-    
-    const speedUpButton = document.createElement('button');
-    speedUpButton.textContent = 'Increase Speed';
-    speedUpButton.addEventListener('click', () => {
-      this.updateInterval = Math.max(50, this.updateInterval - 50);
-      console.log(`Update interval: ${this.updateInterval}ms`);
-    });
-    
-    const slowDownButton = document.createElement('button');
-    slowDownButton.textContent = 'Decrease Speed';
-    slowDownButton.addEventListener('click', () => {
-      this.updateInterval += 50;
-      console.log(`Update interval: ${this.updateInterval}ms`);
-    });
 
-    const resetButton = document.createElement('button');
-    resetButton.textContent = 'Reset Simulation';
-    resetButton.style.marginLeft = '20px';
-    resetButton.style.backgroundColor = '#2196F3'; // Blå färg
-    resetButton.style.color = 'white';
-    resetButton.style.border = 'none';
-    resetButton.style.borderRadius = '4px';
-    resetButton.style.padding = '8px 16px';
-    resetButton.style.cursor = 'pointer';
-    resetButton.addEventListener('click', () => {
-      this.resetSimulation();
-    });
-    
-    controlsDiv.appendChild(pauseButton);
-    controlsDiv.appendChild(speedUpButton);
-    controlsDiv.appendChild(slowDownButton);
-    controlsDiv.appendChild(resetButton);
-  }
-  
-  start() {
-    this.animate(performance.now());
-  }
-  
-  animate(timestamp) {
-    this.animationId = requestAnimationFrame((timestamp) => this.animate(timestamp));
-    
-    if (!this.isPaused && timestamp - this.lastUpdate >= this.updateInterval) {
-      this.lastUpdate = timestamp;
-      this.update();
+    initializeEntities(predatorCount, preyCount, mapWidth, mapHeight) {
+      // Add predators
+      for (let i = 0; i < predatorCount; i++) {
+        const randomX = Math.floor(Math.random() * mapWidth);
+        const randomY = Math.floor(Math.random() * mapHeight);
+        MapSim.map.addEntityAt(randomX, randomY, new Predator(randomX, randomY));
+      }
+
+      // Add prey
+      for (let i = 0; i < preyCount; i++) {
+        const randomX = Math.floor(Math.random() * mapWidth);
+        const randomY = Math.floor(Math.random() * mapHeight);
+        MapSim.map.addEntityAt(randomX, randomY, new Prey(randomX, randomY));
+      }
     }
-  }
-  
-  update() {
-    MapSim.currentTurn++;
 
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    setupControls() {
+      const controlsDiv = document.getElementById('controls');
 
-    // Process grass growth
-    for (let x = 0; x < MapSim.map.getWidth(); x++) {
-      for (let y = 0; y < MapSim.map.getHeight(); y++) {
-        const grass = MapSim.map.getGrassAt(x, y);
-        if (grass) {
-          grass.turn();
-          // Make sure to access getNutrition only if grass exists
-          if (grass.getNutrition() >= 1) {
-            this.ctx.fillStyle = 'green';
-          } else {
-            this.ctx.fillStyle = '#3D2413'; // Brown for no nutrition
+      const pauseButton = document.createElement('button');
+      pauseButton.textContent = 'Pause';
+      pauseButton.addEventListener('click', () => {
+        this.isPaused = !this.isPaused;
+        pauseButton.textContent = this.isPaused ? 'Continue' : 'Pause';
+      });
+
+      const speedUpButton = document.createElement('button');
+      speedUpButton.textContent = 'Increase Speed';
+      speedUpButton.addEventListener('click', () => {
+        this.updateInterval = Math.max(50, this.updateInterval - 50);
+        console.log(`Update interval: ${this.updateInterval}ms`);
+      });
+
+      const slowDownButton = document.createElement('button');
+      slowDownButton.textContent = 'Decrease Speed';
+      slowDownButton.addEventListener('click', () => {
+        this.updateInterval += 50;
+        console.log(`Update interval: ${this.updateInterval}ms`);
+      });
+
+      const resetButton = document.createElement('button');
+      resetButton.textContent = 'Reset Simulation';
+      resetButton.style.marginLeft = '20px';
+      resetButton.style.backgroundColor = '#2196F3'; // Blå färg
+      resetButton.style.color = 'white';
+      resetButton.style.border = 'none';
+      resetButton.style.borderRadius = '4px';
+      resetButton.style.padding = '8px 16px';
+      resetButton.style.cursor = 'pointer';
+      resetButton.addEventListener('click', () => {
+        this.resetSimulation();
+      });
+
+      controlsDiv.appendChild(pauseButton);
+      controlsDiv.appendChild(speedUpButton);
+      controlsDiv.appendChild(slowDownButton);
+      controlsDiv.appendChild(resetButton);
+    }
+
+    start() {
+      this.animate(performance.now());
+    }
+
+    animate(timestamp) {
+      this.animationId = requestAnimationFrame((timestamp) => this.animate(timestamp));
+
+      if (!this.isPaused && timestamp - this.lastUpdate >= this.updateInterval) {
+        this.lastUpdate = timestamp;
+        this.update();
+      }
+    }
+
+    update() {
+      MapSim.currentTurn++;
+
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // Process grass growth
+      for (let x = 0; x < MapSim.map.getWidth(); x++) {
+        for (let y = 0; y < MapSim.map.getHeight(); y++) {
+          const grass = MapSim.map.getGrassAt(x, y);
+          if (grass) {
+            grass.turn();
+            // Make sure to access getNutrition only if grass exists
+            if (grass.getNutrition() >= 1) {
+              this.ctx.fillStyle = 'green';
+            } else {
+              this.ctx.fillStyle = '#3D2413'; // Brown for no nutrition
+            }
+            this.ctx.fillRect(
+              x * MapSim.cellSize, 
+              y * MapSim.cellSize, 
+              MapSim.cellSize, 
+              MapSim.cellSize
+            );
           }
+        }
+      }
+
+      // Process new predators and prey
+      for (let x = 0; x < this.newPredators.length; x++) {
+        for (let y = 0; y < this.newPredators[x].length; y++) {
+          if (this.newPredators[x][y]) {
+            const newPredator = Predator.procreate(x, y);
+            MapSim.map.addEntityAt(newPredator.getCurrentX(), newPredator.getCurrentY(), newPredator);
+            this.newPredators[x][y] = false;
+          }
+
+          if (this.newPreys[x][y]) {
+            const newPrey = Prey.procreate(x, y);
+            MapSim.map.addEntityAt(newPrey.getCurrentX(), newPrey.getCurrentY(), newPrey);
+            this.newPreys[x][y] = false;
+          }
+        }
+      }
+
+      // Remove dead entities
+      for (const predator of this.deadPredators) {
+        MapSim.map.incrementPredatorDead();
+        MapSim.map.removeEntityAt(predator.getCurrentX(), predator.getCurrentY(), predator);
+      }
+      this.deadPredators = [];
+
+      for (const prey of this.deadPreys) {
+        MapSim.map.incrementPreyDead();
+        MapSim.map.removeEntityAt(prey.getCurrentX(), prey.getCurrentY(), prey);
+      }
+      this.deadPreys = [];
+
+      // Process predator turns
+      for (const predator of MapSim.map.getAllPredators()) {
+        predator.turn();
+        const currentX = predator.getCurrentX();
+        const currentY = predator.getCurrentY();
+
+        if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() > Predator.reproductionThreshold) {
+          this.newPredators[currentX][currentY] = true;
+          predator.setEnergy(0);
+        }
+
+        if (predator.isDead()) {
+          this.deadPredators.push(predator);
+        } else {
+          this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+          this.ctx.strokeStyle = 'black';
           this.ctx.fillRect(
-            x * MapSim.cellSize, 
-            y * MapSim.cellSize, 
-            MapSim.cellSize, 
+            currentX * MapSim.cellSize,
+            currentY * MapSim.cellSize,
+            MapSim.cellSize,
+            MapSim.cellSize
+          );
+          this.ctx.strokeRect(
+            currentX * MapSim.cellSize,
+            currentY * MapSim.cellSize,
+            MapSim.cellSize,
             MapSim.cellSize
           );
         }
       }
-    }
-    
-    // Process new predators and prey
-    for (let x = 0; x < this.newPredators.length; x++) {
-      for (let y = 0; y < this.newPredators[x].length; y++) {
-        if (this.newPredators[x][y]) {
-          const newPredator = Predator.procreate(x, y);
-          MapSim.map.addEntityAt(newPredator.getCurrentX(), newPredator.getCurrentY(), newPredator);
-          this.newPredators[x][y] = false;
+
+      // Process prey turns
+      for (const prey of MapSim.map.getAllPreys()) {
+        prey.turn();
+        const currentX = prey.getCurrentX();
+        const currentY = prey.getCurrentY();
+
+        if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > Prey.reproductionThreshold) {
+          this.newPreys[currentX][currentY] = true;
+          prey.setEnergy(0);
         }
-        
-        if (this.newPreys[x][y]) {
-          const newPrey = Prey.procreate(x, y);
-          MapSim.map.addEntityAt(newPrey.getCurrentX(), newPrey.getCurrentY(), newPrey);
-          this.newPreys[x][y] = false;
+
+        if (prey.isDead()) {
+          this.deadPreys.push(prey);
+        } else {
+          this.ctx.fillStyle = 'rgba(0, 0, 255, 0.7)';
+          this.ctx.strokeStyle = 'black';
+          this.ctx.fillRect(
+            currentX * MapSim.cellSize,
+            currentY * MapSim.cellSize,
+            MapSim.cellSize,
+            MapSim.cellSize
+          );
+          this.ctx.strokeRect(
+            currentX * MapSim.cellSize,
+            currentY * MapSim.cellSize,
+            MapSim.cellSize,
+            MapSim.cellSize
+          );
         }
       }
-    }
-    
-    // Remove dead entities
-    for (const predator of this.deadPredators) {
-      MapSim.map.incrementPredatorDead();
-      MapSim.map.removeEntityAt(predator.getCurrentX(), predator.getCurrentY(), predator);
-    }
-    this.deadPredators = [];
-    
-    for (const prey of this.deadPreys) {
-      MapSim.map.incrementPreyDead();
-      MapSim.map.removeEntityAt(prey.getCurrentX(), prey.getCurrentY(), prey);
-    }
-    this.deadPreys = [];
-    
-    // Process predator turns
-    for (const predator of MapSim.map.getAllPredators()) {
-      predator.turn();
-      const currentX = predator.getCurrentX();
-      const currentY = predator.getCurrentY();
-      
-      if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() > Predator.reproductionThreshold) {
-        this.newPredators[currentX][currentY] = true;
-        predator.setEnergy(0);
+
+      // Reset turns
+      for (const predator of MapSim.map.getAllPredators()) {
+        predator.resetTurn();
       }
-      
-      if (predator.isDead()) {
-        this.deadPredators.push(predator);
-      } else {
-        this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
-        this.ctx.strokeStyle = 'black';
-        this.ctx.fillRect(
-          currentX * MapSim.cellSize,
-          currentY * MapSim.cellSize,
-          MapSim.cellSize,
-          MapSim.cellSize
-        );
-        this.ctx.strokeRect(
-          currentX * MapSim.cellSize,
-          currentY * MapSim.cellSize,
-          MapSim.cellSize,
-          MapSim.cellSize
-        );
+
+      for (const prey of MapSim.map.getAllPreys()) {
+        prey.resetTurn();
       }
-    }
-    
-    // Process prey turns
-    for (const prey of MapSim.map.getAllPreys()) {
-      prey.turn();
-      const currentX = prey.getCurrentX();
-      const currentY = prey.getCurrentY();
-      
-      if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() > Prey.reproductionThreshold) {
-        this.newPreys[currentX][currentY] = true;
-        prey.setEnergy(0);
+
+      // Check if simulation should end
+      if (MapSim.map.getAllPredators().length === 0 && MapSim.map.getAllPreys().length === 0 && MapSim.currentTurn > 0) {
+        cancelAnimationFrame(this.animationId);
+        this.showFinalStatistics();
       }
-      
-      if (prey.isDead()) {
-        this.deadPreys.push(prey);
-      } else {
-        this.ctx.fillStyle = 'rgba(0, 0, 255, 0.7)';
-        this.ctx.strokeStyle = 'black';
-        this.ctx.fillRect(
-          currentX * MapSim.cellSize,
-          currentY * MapSim.cellSize,
-          MapSim.cellSize,
-          MapSim.cellSize
-        );
-        this.ctx.strokeRect(
-          currentX * MapSim.cellSize,
-          currentY * MapSim.cellSize,
-          MapSim.cellSize,
-          MapSim.cellSize
-        );
+
+      // Update stats display
+      this.updateStats();
+    }
+
+    updateStats() {
+      const statsDiv = document.getElementById('stats');
+      statsDiv.innerHTML = `
+        <div class="stats-box">
+          <p>Turn: ${MapSim.currentTurn}</p>
+          <p>Predators: ${MapSim.map.getAllPredators().length} (Born: ${MapSim.map.getPredatorBorn()}, Dead: ${MapSim.map.getPredatorDead()})</p>
+          <p>Prey: ${MapSim.map.getAllPreys().length} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Starved: ${MapSim.map.getPreyDead()}, Dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
+          <p>Grass: (Eaten: ${MapSim.map.getGrassEaten()}, Grown: ${MapSim.map.getGrassGrown()})</p>
+        </div>
+      `;
+    }
+
+    showFinalStatistics() {
+      // Create popup container
+      const finalStatsDiv = document.createElement('div');
+      finalStatsDiv.id = 'final-stats-popup'; // Add ID for easier selection
+      finalStatsDiv.style.position = 'fixed';
+      finalStatsDiv.style.top = '50%';
+      finalStatsDiv.style.left = '50%';
+      finalStatsDiv.style.transform = 'translate(-50%, -50%)';
+      finalStatsDiv.style.backgroundColor = 'white';
+      finalStatsDiv.style.padding = '20px';
+      finalStatsDiv.style.borderRadius = '8px';
+      finalStatsDiv.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+      finalStatsDiv.style.zIndex = '1000';
+      finalStatsDiv.style.maxWidth = '500px';
+      finalStatsDiv.style.width = '80%';
+
+      // Create header
+      const header = document.createElement('h2');
+      header.textContent = 'Slutgiltig Statistik';
+      finalStatsDiv.appendChild(header);
+
+      // Create content
+      const content = document.createElement('div');
+      content.innerHTML = `
+        <p><strong>Antal omgångar:</strong> ${MapSim.currentTurn}</p>
+
+        <h3>Rovdjur</h3>
+        <p>Födda: ${MapSim.map.getPredatorBorn()}</p>
+        <p>Döda: ${MapSim.map.getPredatorDead()}</p>
+
+        <h3>Bytesdjur</h3>
+        <p>Födda: ${MapSim.map.getPreyBorn()}</p>
+        <p>Uppätna: ${MapSim.map.getPreyEaten()}</p>
+        <p>Svältdöda: ${MapSim.map.getPreyDead()}</p>
+        <p>Totalt döda: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
+
+        <h3>Gräs</h3>
+        <p>Ätit: ${MapSim.map.getGrassEaten()}</p>
+        <p>Växt: ${MapSim.map.getGrassGrown()}</p>
+      `;
+      finalStatsDiv.appendChild(content);
+
+      // Create restart button
+      const restartButton = document.createElement('button');
+      restartButton.textContent = 'Starta Ny Simulation';
+      restartButton.style.marginTop = '15px';
+      restartButton.style.padding = '10px 16px';
+      restartButton.style.backgroundColor = '#4CAF50';
+      restartButton.style.color = 'white';
+      restartButton.style.border = 'none';
+      restartButton.style.borderRadius = '4px';
+      restartButton.style.cursor = 'pointer';
+      restartButton.style.width = '100%';
+      restartButton.addEventListener('click', () => this.resetSimulation());
+      finalStatsDiv.appendChild(restartButton);
+
+      // Add to document body
+      document.body.appendChild(finalStatsDiv);
+    }
+
+    resetSimulation() {
+      // Remove the final stats popup if it exists
+      const finalStatsPopup = document.getElementById('final-stats-popup');
+      if (finalStatsPopup) {
+        document.body.removeChild(finalStatsPopup);
       }
-    }
-    
-    // Reset turns
-    for (const predator of MapSim.map.getAllPredators()) {
-      predator.resetTurn();
-    }
-    
-    for (const prey of MapSim.map.getAllPreys()) {
-      prey.resetTurn();
-    }
-    
-    // Check if simulation should end
-    if (MapSim.map.getAllPredators().length === 0 && MapSim.map.getAllPreys().length === 0 && MapSim.currentTurn > 0) {
+
+      // Stoppa animationsloopen
       cancelAnimationFrame(this.animationId);
-      this.showFinalStatistics();
+
+      // Återställ statistik
+      MapSim.currentTurn = 0;
+
+      // Återställ kartan genom att anropa initialisering igen
+      this.initializeMap();
+
+      // Also reset all Map statistics - they weren't being reset before
+      if (MapSim.map) {
+        MapSim.map.predatorBorn = 0;
+        MapSim.map.preyBorn = 0;
+        MapSim.map.predatorDead = 0;
+        MapSim.map.preyEaten = 0;
+        MapSim.map.grassEaten = 0;
+        MapSim.map.grassGrown = 0;
+        MapSim.map.preyDead = 0;
+      }
+
+      // Visa konfigurationsrutan igen
+      this.showConfigDialog();
+
+      // Rensa statistikdisplayen
+      const statsDiv = document.getElementById('stats');
+      statsDiv.innerHTML = '';
     }
-    
-    // Update stats display
-    this.updateStats();
   }
-  
-  updateStats() {
-    const statsDiv = document.getElementById('stats');
-    statsDiv.innerHTML = `
-      <div class="stats-box">
-        <p>Turn: ${MapSim.currentTurn}</p>
-        <p>Predators: ${MapSim.map.getAllPredators().length} (Born: ${MapSim.map.getPredatorBorn()}, Dead: ${MapSim.map.getPredatorDead()})</p>
-        <p>Prey: ${MapSim.map.getAllPreys().length} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Starved: ${MapSim.map.getPreyDead()}, Dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
-        <p>Grass: (Eaten: ${MapSim.map.getGrassEaten()}, Grown: ${MapSim.map.getGrassGrown()})</p>
-      </div>
-    `;
-  }
-
-  showFinalStatistics() {
-    // Create popup container
-    const finalStatsDiv = document.createElement('div');
-    finalStatsDiv.id = 'final-stats-popup'; // Add ID for easier selection
-    finalStatsDiv.style.position = 'fixed';
-    finalStatsDiv.style.top = '50%';
-    finalStatsDiv.style.left = '50%';
-    finalStatsDiv.style.transform = 'translate(-50%, -50%)';
-    finalStatsDiv.style.backgroundColor = 'white';
-    finalStatsDiv.style.padding = '20px';
-    finalStatsDiv.style.borderRadius = '8px';
-    finalStatsDiv.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-    finalStatsDiv.style.zIndex = '1000';
-    finalStatsDiv.style.maxWidth = '500px';
-    finalStatsDiv.style.width = '80%';
-    
-    // Create header
-    const header = document.createElement('h2');
-    header.textContent = 'Slutgiltig Statistik';
-    finalStatsDiv.appendChild(header);
-    
-    // Create content
-    const content = document.createElement('div');
-    content.innerHTML = `
-      <p><strong>Antal omgångar:</strong> ${MapSim.currentTurn}</p>
-
-      <h3>Rovdjur</h3>
-      <p>Födda: ${MapSim.map.getPredatorBorn()}</p>
-      <p>Döda: ${MapSim.map.getPredatorDead()}</p>
-
-      <h3>Bytesdjur</h3>
-      <p>Födda: ${MapSim.map.getPreyBorn()}</p>
-      <p>Uppätna: ${MapSim.map.getPreyEaten()}</p>
-      <p>Svältdöda: ${MapSim.map.getPreyDead()}</p>
-      <p>Totalt döda: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
-
-      <h3>Gräs</h3>
-      <p>Ätit: ${MapSim.map.getGrassEaten()}</p>
-      <p>Växt: ${MapSim.map.getGrassGrown()}</p>
-    `;
-    finalStatsDiv.appendChild(content);
-    
-    // Create restart button
-    const restartButton = document.createElement('button');
-    restartButton.textContent = 'Starta Ny Simulation';
-    restartButton.style.marginTop = '15px';
-    restartButton.style.padding = '10px 16px';
-    restartButton.style.backgroundColor = '#4CAF50';
-    restartButton.style.color = 'white';
-    restartButton.style.border = 'none';
-    restartButton.style.borderRadius = '4px';
-    restartButton.style.cursor = 'pointer';
-    restartButton.style.width = '100%';
-    restartButton.addEventListener('click', () => this.resetSimulation());
-    finalStatsDiv.appendChild(restartButton);
-    
-    // Add to document body
-    document.body.appendChild(finalStatsDiv);
-  }
-
-  resetSimulation() {
-    // Remove the final stats popup if it exists
-    const finalStatsPopup = document.getElementById('final-stats-popup');
-    if (finalStatsPopup) {
-      document.body.removeChild(finalStatsPopup);
-    }
-    
-    // Stoppa animationsloopen
-    cancelAnimationFrame(this.animationId);
-    
-    // Återställ statistik
-    MapSim.currentTurn = 0;
-    
-    // Återställ kartan genom att anropa initialisering igen
-    this.initializeMap();
-    
-    // Also reset all Map statistics - they weren't being reset before
-    if (MapSim.map) {
-      MapSim.map.predatorBorn = 0;
-      MapSim.map.preyBorn = 0;
-      MapSim.map.predatorDead = 0;
-      MapSim.map.preyEaten = 0;
-      MapSim.map.grassEaten = 0;
-      MapSim.map.grassGrown = 0;
-      MapSim.map.preyDead = 0;
-    }
-    
-    // Visa konfigurationsrutan igen
-    this.showConfigDialog();
-    
-    // Rensa statistikdisplayen
-    const statsDiv = document.getElementById('stats');
-    statsDiv.innerHTML = '';
-  }
+  return MapSim
 }
-
-export default MapSim;
+export default async function() {
+  return await loadModules();
+}
