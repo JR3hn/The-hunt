@@ -260,14 +260,14 @@ class MapSim {
     const speedUpButton = document.createElement('button');
     speedUpButton.textContent = 'Increase Speed';
     speedUpButton.addEventListener('click', () => {
-      this.updateInterval = Math.max(100, this.updateInterval - 100);
+      this.updateInterval = Math.max(50, this.updateInterval - 50);
       console.log(`Update interval: ${this.updateInterval}ms`);
     });
     
     const slowDownButton = document.createElement('button');
     slowDownButton.textContent = 'Decrease Speed';
     slowDownButton.addEventListener('click', () => {
-      this.updateInterval += 100;
+      this.updateInterval += 50;
       console.log(`Update interval: ${this.updateInterval}ms`);
     });
 
@@ -432,7 +432,7 @@ class MapSim {
     }
     
     // Check if simulation should end
-    if (MapSim.map.getAllPredators().length === 0 && MapSim.map.getAllPreys().length === 0) {
+    if (MapSim.map.getAllPredators().length === 0 && MapSim.map.getAllPreys().length === 0 && MapSim.currentTurn > 0) {
       cancelAnimationFrame(this.animationId);
       this.showFinalStatistics();
     }
@@ -456,6 +456,7 @@ class MapSim {
   showFinalStatistics() {
     // Create popup container
     const finalStatsDiv = document.createElement('div');
+    finalStatsDiv.id = 'final-stats-popup'; // Add ID for easier selection
     finalStatsDiv.style.position = 'fixed';
     finalStatsDiv.style.top = '50%';
     finalStatsDiv.style.left = '50%';
@@ -468,39 +469,53 @@ class MapSim {
     finalStatsDiv.style.maxWidth = '500px';
     finalStatsDiv.style.width = '80%';
     
-    // Add a header
+    // Create header
     const header = document.createElement('h2');
-    header.textContent = 'Final Statistics';
+    header.textContent = 'Slutgiltig Statistik';
     finalStatsDiv.appendChild(header);
     
-    // Add simulation data
-    finalStatsDiv.innerHTML += `
-      <p><strong>Total Turns:</strong> ${MapSim.currentTurn}</p>
-      <h3>Predators</h3>
-      <p>Born: ${MapSim.map.getPredatorBorn()}</p>
-      <!-- ... rest of statistics ... -->
+    // Create content
+    const content = document.createElement('div');
+    content.innerHTML = `
+      <p><strong>Antal omgångar:</strong> ${MapSim.currentTurn}</p>
+
+      <h3>Rovdjur</h3>
+      <p>Födda: ${MapSim.map.getPredatorBorn()}</p>
+      <p>Döda: ${MapSim.map.getPredatorDead()}</p>
+
+      <h3>Bytesdjur</h3>
+      <p>Födda: ${MapSim.map.getPreyBorn()}</p>
+      <p>Uppätna: ${MapSim.map.getPreyEaten()}</p>
+      <p>Svältdöda: ${MapSim.map.getPreyDead()}</p>
+      <p>Totalt döda: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
+
+      <h3>Gräs</h3>
+      <p>Ätit: ${MapSim.map.getGrassEaten()}</p>
+      <p>Växt: ${MapSim.map.getGrassGrown()}</p>
     `;
+    finalStatsDiv.appendChild(content);
     
-    // Create a restart button
+    // Create restart button
     const restartButton = document.createElement('button');
-    restartButton.textContent = 'Start New Simulation';
-    restartButton.style.marginTop = '10px';
-    restartButton.style.padding = '8px 16px';
+    restartButton.textContent = 'Starta Ny Simulation';
+    restartButton.style.marginTop = '15px';
+    restartButton.style.padding = '10px 16px';
     restartButton.style.backgroundColor = '#4CAF50';
     restartButton.style.color = 'white';
     restartButton.style.border = 'none';
     restartButton.style.borderRadius = '4px';
     restartButton.style.cursor = 'pointer';
+    restartButton.style.width = '100%';
     restartButton.addEventListener('click', () => this.resetSimulation());
     finalStatsDiv.appendChild(restartButton);
     
-    // Add to document body (not to stats div)
+    // Add to document body
     document.body.appendChild(finalStatsDiv);
   }
 
   resetSimulation() {
     // Remove the final stats popup if it exists
-    const finalStatsPopup = document.querySelector('div[style*="position: fixed"]');
+    const finalStatsPopup = document.getElementById('final-stats-popup');
     if (finalStatsPopup) {
       document.body.removeChild(finalStatsPopup);
     }
@@ -513,6 +528,17 @@ class MapSim {
     
     // Återställ kartan genom att anropa initialisering igen
     this.initializeMap();
+    
+    // Also reset all Map statistics - they weren't being reset before
+    if (MapSim.map) {
+      MapSim.map.predatorBorn = 0;
+      MapSim.map.preyBorn = 0;
+      MapSim.map.predatorDead = 0;
+      MapSim.map.preyEaten = 0;
+      MapSim.map.grassEaten = 0;
+      MapSim.map.grassGrown = 0;
+      MapSim.map.preyDead = 0;
+    }
     
     // Visa konfigurationsrutan igen
     this.showConfigDialog();
