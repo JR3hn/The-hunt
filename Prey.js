@@ -88,7 +88,7 @@ class Prey {
       let escapeX = this.currentX;
       let escapeY = this.currentY;
       
-      if (Math.random() < 0.3) { // 30% chance to choose random direction
+      if (Math.random() < 0.4) { // 40% chance to choose random direction
         escapeX = this.currentX + (Math.random() < 0.5 ? -1 : 1);
         escapeY = this.currentY + (Math.random() < 0.5 ? -1 : 1);
       } else {
