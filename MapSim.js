@@ -331,7 +331,10 @@ async function loadModules() {
           const grass = MapSim.map.getGrassAt(x, y);
           if (grass) {
             // Update the growthrate for all grass objects since they do not change
-            grass.updateGrowthRate();
+            if (grass.instanceGrowthRate !== Grass.growthRate) {
+              grass.instanceGrowthRate = Grass.growthRate;
+              grass.nextGrow = 0; // Reset the counter when changing rate
+            }
             grass.turn();
             // Make sure to access getNutrition only if grass exists
             if (grass.getNutrition() >= 1) {

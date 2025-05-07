@@ -29,12 +29,6 @@ class Grass {
         }
     }
 
-    // Add this method
-    updateGrowthRate() {
-        this.instanceGrowthRate = Grass.growthRate;
-        this.nextGrow = 0;
-    }
-
     consume(){
         if (this.nutrition > 0){
             this.nutrition--;
