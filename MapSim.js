@@ -12,7 +12,7 @@ class MapSim {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext('2d');
     this.isPaused = false;
-    this.updateInterval = 10; // milliseconds
+    this.updateInterval = 50; // milliseconds
     this.lastUpdate = 0;
 
     this.lastPredatorCount = 800;

@@ -119,6 +119,13 @@ class Predator {
       }
     }
 
+    mateOtherPredators(predator) {
+      if (!predator.hasActed){
+          predator.moveToFriend(this);
+          predator.hasActed = true;
+      }
+    }
+
     search() {
       for (let i = -2; i <= 2; i++) {
         for (let j = -2; j <= 2; j++) {
@@ -199,8 +206,9 @@ class Predator {
     turn() {
         if (!this.hasActed) {
           const friends = this.findFriends();
-          if (this.energy >= Predator.reproductionThreshold * 2 && friends.length > 0){
+          if (this.energy >= Predator.reproductionThreshold && friends.length > 0){
             this.moveToFriend(friends[0]);
+            this.mateOtherPredators(friends[0])
           } else {
             this.hunt();
           }
