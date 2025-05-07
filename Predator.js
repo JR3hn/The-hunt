@@ -216,8 +216,12 @@ class Predator {
         if (!this.hasActed) {
           const friends = this.findFriends();
           if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.2){
-            this.moveToFriend(friends[0]);
-            this.mateOtherPredators(friends[0])
+
+            const randomIndex = Math.floor(Math.random() * friends.length);
+            const chosenMate = friends[randomIndex];
+
+            this.moveToFriend(chosenMate);
+            this.mateOtherPredators(chosenMate);
           } else {
             this.hunt();
           }

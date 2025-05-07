@@ -88,11 +88,16 @@ class Prey {
       let escapeX = this.currentX;
       let escapeY = this.currentY;
       
-      const closestPredator = this.findClosestPredator();
-      if (closestPredator.getCurrentX() > this.currentX) escapeX--;
-      else if (closestPredator.getCurrentX() < this.currentX) escapeX++;
-      if (closestPredator.getCurrentY() > this.currentY) escapeY--;
-      else if (closestPredator.getCurrentY() < this.currentY) escapeY++;
+      if (Math.random() < 0.3) { // 30% chance to choose random direction
+        escapeX = this.currentX + (Math.random() < 0.5 ? -1 : 1);
+        escapeY = this.currentY + (Math.random() < 0.5 ? -1 : 1);
+      } else {
+        const closestPredator = this.findClosestPredator();
+        if (closestPredator.getCurrentX() > this.currentX) escapeX--;
+        else if (closestPredator.getCurrentX() < this.currentX) escapeX++;
+        if (closestPredator.getCurrentY() > this.currentY) escapeY--;
+        else if (closestPredator.getCurrentY() < this.currentY) escapeY++;
+      }
       
       if (Prey.map.inBounds(escapeX, escapeY)) {
         Prey.map.moveEntity(this.currentX, this.currentY, escapeX, escapeY, this);
