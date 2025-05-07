@@ -18,6 +18,7 @@ class MapSim {
     this.lastPredatorCount = 800;
     this.lastPreyCount = 2000;
     this.lastCellSize = MapSim.cellSize;
+    this.lastReproductionThreshold = Predator.reproductionThreshold;
     
     this.canvas.width = window.innerWidth - 20;
     this.canvas.height = window.innerHeight - 150;
@@ -163,7 +164,7 @@ class MapSim {
     reproThresholdInput.id = 'repro-threshold';
     reproThresholdInput.min = '1';
     reproThresholdInput.max = '50';
-    reproThresholdInput.value = String(Predator.reproductionThreshold);
+    reproThresholdInput.value = String(this.lastReproductionThreshold);
     reproThresholdInput.style.width = '100%';
     reproThresholdInput.style.marginBottom = '15px';
     configDiv.appendChild(reproThresholdInput);
@@ -207,6 +208,7 @@ class MapSim {
       this.lastPredatorCount = predatorCount;
       this.lastPreyCount = preyCount;
       this.lastCellSize = cellSize;
+      this.lastReproductionThreshold = reproThreshold;
       
       MapSim.cellSize = cellSize;
       Predator.initialLife = predatorLife;
