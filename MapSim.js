@@ -20,7 +20,7 @@ async function loadModules() {
       this.updateInterval = 50; // milliseconds
       this.lastUpdate = 0;
 
-      this.lastPredatorCount = 1000;
+      this.lastPredatorCount = 1200;
       this.lastPreyCount = 2000;
       this.lastCellSize = MapSim.cellSize;
       this.lastReproductionThreshold = Predator.reproductionThreshold;
@@ -224,8 +224,7 @@ async function loadModules() {
         Prey.reproductionThreshold = reproThreshold;
         Grass.growthRate = grassSpeed;
 
-        // Uppdatera cellstorleken och återinitiera kartan
-        MapSim.cellSize = cellSize;
+        // Initialize map
         this.initializeMap();
 
         // Initialize entities with user-configured values
