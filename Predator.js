@@ -79,8 +79,8 @@ s
     kill(prey){
       if (prey && !prey.isDead()) {
       prey.killed();
-      this.energy += 2;
-      this.lifeSpan++;
+      this.energy += 3;
+      //this.lifeSpan++;
       }
     }
 
@@ -216,12 +216,12 @@ s
     turn() {
         if (!this.hasActed) {
           const friends = this.findFriends();
-          if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.8){
-            this.moveToFriend(friends[0]);
-            this.mateOtherPredators(friends[0])
-          } else {
+          //if (this.energy >= Predator.reproductionThreshold && friends.length > 0 && Math.random() < 0.){
+          //  this.moveToFriend(friends[0]);
+          //  this.mateOtherPredators(friends[0])
+          //} else {
             this.hunt();
-          }
+          //}
         }
         this.age();
     }
