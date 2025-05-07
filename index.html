@@ -50,16 +50,27 @@
     <script type="module">
         // När sidan har laddats
         window.addEventListener('DOMContentLoaded', async () => {
-            //Importera med cache busting
+            // Add meta tag to prevent caching
+            const meta = document.createElement('meta');
+            meta.httpEquiv = 'Cache-Control';
+            meta.content = 'no-cache, no-store, must-revalidate';
+            document.head.appendChild(meta);
+            
+            // Force browser to reload all scripts
             const timestamp = new Date().getTime();
-            const MapSimModule = await import(`./MapSim.js?v=${timestamp}`);
             
-            //Hämta MapSim klassen
-            const MapSim = MapSimModule.default;
-
-            // Initiera MapSim med canvas-id
-            const mapSim = new MapSim('simulation-canvas');
+            // Create a version object to be passed to modules
+            window.__APP_VERSION = timestamp;
             
+            // Import with cache busting
+            try {
+                const MapSimModule = await import(`./MapSim.js?v=${timestamp}`);
+                const MapSim = MapSimModule.default;
+                const mapSim = new MapSim('simulation-canvas');
+            } catch (error) {
+                console.error("Failed to load simulation:", error);
+                document.body.innerHTML += `<div style="color:red">Error loading simulation: ${error.message}</div>`;
+            }
         });
     </script>
 </body>
