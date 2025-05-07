@@ -137,8 +137,8 @@ class Predator {
     }
 
     search() {
-      for (let i = -2; i <= 2; i++) {
-        for (let j = -2; j <= 2; j++) {
+      for (let i = -4; i <= 4; i++) {
+        for (let j = -4; j <= 4; j++) {
           const targetX = this.currentX + i;
           const targetY = this.currentY + j;
     
