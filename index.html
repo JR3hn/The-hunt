@@ -48,7 +48,7 @@
     
     <!-- MapSim modul -->
     <script type="module">
-        // När sidan har laddats
+        // When page has loaded
         window.addEventListener('DOMContentLoaded', async () => {
             // Add meta tag to prevent caching
             const meta = document.createElement('meta');
@@ -65,8 +65,9 @@
             // Import with cache busting
             try {
                 const MapSimModule = await import(`./MapSim.js?v=${timestamp}`);
-                const MapSim = MapSimModule.default;
-                const mapSim = new MapSim('simulation-canvas');
+                const MapSimLoader = MapSimModule.default;
+                const MapSim = await MapSimLoader();  // Call the function to get the class
+                const mapSim = new MapSim('simulation-canvas');  // Now this will work
             } catch (error) {
                 console.error("Failed to load simulation:", error);
                 document.body.innerHTML += `<div style="color:red">Error loading simulation: ${error.message}</div>`;
