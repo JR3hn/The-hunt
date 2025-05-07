@@ -78,7 +78,7 @@ class Predator {
     kill(prey){
       if (prey && !prey.isDead()) {
       prey.killed();
-      this.energy += 2;
+      this.energy += 1;
       }
     }
 
