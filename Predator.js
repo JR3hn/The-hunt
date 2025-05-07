@@ -80,7 +80,7 @@ s
       if (prey && !prey.isDead()) {
       prey.killed();
       this.energy += 2;
-      //this.lifeSpan++;
+      this.lifeSpan++;
       }
     }
 
