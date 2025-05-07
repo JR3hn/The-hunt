@@ -48,11 +48,15 @@
     
     <!-- MapSim modul -->
     <script type="module">
-        const timestamp = new Date().getTime();
-        import(`./MapSim.js?v=${timestamp}`);
-        
         // När sidan har laddats
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            //Importera med cache busting
+            const timestamp = new Date().getTime();
+            const MapSimModule = await import(`./MapSim.js?v=${timestamp}`);
+            
+            //Hämta MapSim klassen
+            const MapSim = MapSimModule.default;
+
             // Initiera MapSim med canvas-id
             const mapSim = new MapSim('simulation-canvas');
             
