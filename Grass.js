@@ -1,5 +1,5 @@
 class Grass {
-    static growthRate = 20;
+    static growthRate = 15;
 
     constructor(map) {
         this.nextGrow = 0;

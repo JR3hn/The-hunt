@@ -65,8 +65,8 @@ class Prey {
   escape() {
     this.predatorNearby = false;
     
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
+    for (let i = -2; i <= 2; i++) {
+      for (let j = -2; j <= 2; j++) {
         const targetX = this.currentX + i;
         const targetY = this.currentY + j;
         

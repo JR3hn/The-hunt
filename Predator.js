@@ -3,7 +3,7 @@ class Predator {
     static map = null;
     static INITIAL_ENERGY = 0;
     static reproductionThreshold = 1;
-    static initialLife = 45;
+    static initialLife = 30;
 
     constructor(initialX, initialY){
         this.lifeSpan = Predator.initialLife;
@@ -143,8 +143,8 @@ class Predator {
       }
       // Create shuffled list of offsets for randomizing
       const offsets = [];
-      for (let i = -5; i <= 5; i++) {
-        for (let j = -5; j <= 5; j++) {
+      for (let i = -3; i <= 3; i++) {
+        for (let j = -3; j <= 3; j++) {
           if (i !== 0 || j !== 0) offsets.push([i, j]);
         }
       }
