@@ -454,21 +454,53 @@ class MapSim {
   }
 
   showFinalStatistics() {
+    // Get the stats container
     const statsDiv = document.getElementById('stats');
-    statsDiv.innerHTML += `
-      <div class="final-stats">
-        <h2>Simulation Complete</h2>
-        <p>Total Turns: ${MapSim.currentTurn}</p>
-        <p>Predators Born: ${MapSim.map.getPredatorBorn()}</p>
-        <p>Predators Dead: ${MapSim.map.getPredatorDead()}</p>
-        <p>Prey Born: ${MapSim.map.getPreyBorn()}</p>
-        <p>Prey Eaten: ${MapSim.map.getPreyEaten()}</p>
-        <p>Prey Starved: ${MapSim.map.getPreyDead()}</p>
-        <p>Prey Dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
-        <p>Grass Eaten: ${MapSim.map.getGrassEaten()}</p>
-        <p>Grass Grown: ${MapSim.map.getGrassGrown()}</p>
-      </div>
+    
+    // Clear existing content
+    statsDiv.innerHTML = '';
+    
+    // Create final stats container
+    const finalStatsDiv = document.createElement('div');
+    finalStatsDiv.className = 'final-stats';
+    
+    // Add a header
+    const header = document.createElement('h2');
+    header.textContent = 'Final Statistics';
+    finalStatsDiv.appendChild(header);
+    
+    // Add simulation data
+    finalStatsDiv.innerHTML += `
+      <p><strong>Total Turns:</strong> ${MapSim.currentTurn}</p>
+      <h3>Predators</h3>
+      <p>Born: ${MapSim.map.getPredatorBorn()}</p>
+      <p>Dead: ${MapSim.map.getPredatorDead()}</p>
+      <p>Remaining: ${MapSim.map.getAllPredators().length}</p>
+      
+      <h3>Prey</h3>
+      <p>Born: ${MapSim.map.getPreyBorn()}</p>
+      <p>Eaten: ${MapSim.map.getPreyEaten()}</p>
+      <p>Died naturally: ${MapSim.map.getPreyDead()}</p>
+      <p>Died totally: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
+      <p>Remaining: ${MapSim.map.getAllPreys().length}</p>
+      
+      <h3>Grass</h3>
+      <p>Grown: ${MapSim.map.getGrassGrown()}</p>
+      <p>Eaten: ${MapSim.map.getGrassEaten()}</p>
     `;
+    
+    // Append to the stats div
+    statsDiv.appendChild(finalStatsDiv);
+    
+    console.log("Final statistics displayed");
+    
+    // Create a restart button
+    const restartButton = document.createElement('button');
+    restartButton.textContent = 'Start New Simulation';
+    restartButton.style.marginTop = '10px';
+    restartButton.style.padding = '8px 16px';
+    restartButton.addEventListener('click', () => this.resetSimulation());
+    finalStatsDiv.appendChild(restartButton);
   }
 
   resetSimulation() {
