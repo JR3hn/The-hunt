@@ -79,7 +79,6 @@ class Predator {
       if (prey && !prey.isDead()) {
       prey.killed();
       this.energy += 2;
-      this.lifeSpan++;
       }
     }
 
@@ -219,7 +218,7 @@ class Predator {
     turn() {
       if (!this.hasActed) {
         const friends = this.findFriends();
-        if (friends.length > 0 && this.energy >= Predator.reproductionThreshold && Math.random() < 0.3){
+        if (friends.length > 0 && this.energy >= Predator.reproductionThreshold){
           const randomIndex = Math.floor(Math.random() * friends.length);
           const chosenMate = friends[randomIndex];
           this.moveToFriend(chosenMate);

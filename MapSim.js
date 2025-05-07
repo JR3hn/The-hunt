@@ -390,7 +390,7 @@ async function loadModules() {
 
         if (MapSim.map.hasMultiplePredatorsAt(currentX, currentY) && predator.getEnergy() >= Predator.reproductionThreshold) {
           this.newPredators[currentX][currentY] = true;
-          predator.setEnergy(1);
+          predator.setEnergy(0);
         }
 
         if (predator.isDead()) {
