@@ -79,7 +79,7 @@ class Predator {
       if (prey && !prey.isDead()) {
       prey.killed();
       this.energy += 2;
-      this.lifeSpan += 130;
+      this.lifeSpan++;
       }
     }
 
@@ -209,18 +209,18 @@ class Predator {
   }
 
     turn() {
-        if (!this.hasActed) {
-          const friends = this.findFriends();
-          if (friends.length > 0 && this.energy >= Predator.reproductionThreshold){
-            const randomIndex = Math.floor(Math.random() * friends.length);
-            const chosenMate = friends[randomIndex];
-            if (chosenMate.getEnergy() >= Predator.reproductionThreshold) {
-              this.moveToFriend(chosenMate);
-              this.mateOtherPredators(chosenMate);
-              this.hasActed = true;
-            } 
-          }
-        }
+       //if (!this.hasActed) {
+       //  const friends = this.findFriends();
+       //  if (friends.length > 0 && this.energy >= Predator.reproductionThreshold){
+       //    const randomIndex = Math.floor(Math.random() * friends.length);
+       //    const chosenMate = friends[randomIndex];
+       //    if (chosenMate.getEnergy() >= Predator.reproductionThreshold) {
+       //      this.moveToFriend(chosenMate);
+       //      this.mateOtherPredators(chosenMate);
+       //      this.hasActed = true;
+       //    } 
+       //  }
+       //}
         if (!this.hasActed) {
           this.hunt()
         }
