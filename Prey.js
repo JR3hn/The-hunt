@@ -146,7 +146,7 @@ class Prey {
     this.move();
     this.eat();
     this.age();
-    this.escape();
+    //this.escape();
     this.hasActed = true;
   }
   
