@@ -275,9 +275,17 @@ async function loadModules() {
       const pauseButton = document.createElement('button');
       pauseButton.textContent = 'Pause';
       pauseButton.addEventListener('click', () => {
-        this.isPaused = !this.isPaused;
-        pauseButton.textContent = this.isPaused ? 'Continue' : 'Pause';
-        this.update();
+        // Check if config dialog or final stats popup is visible
+        const configDialogVisible = document.getElementById('config-dialog') !== null;
+        const finalStatsVisible = document.getElementById('final-stats-popup') !== null;
+        const historyPopupVisible = document.getElementById('history-popup') !== null;
+
+        // Only toggle pause if none of these dialogs are visible
+        if (!configDialogVisible && !finalStatsVisible && !historyPopupVisible) {
+          this.isPaused = !this.isPaused;
+          pauseButton.textContent = this.isPaused ? 'Continue' : 'Pause';
+          this.update();
+        }
       });
 
       const speedUpButton = document.createElement('button');
