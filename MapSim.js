@@ -81,11 +81,11 @@ async function loadModules() {
       configDiv.style.width = '300px';
 
       const header = document.createElement('h2');
-      header.textContent = 'Konfigurera Simulation';
+      header.textContent = 'Configure the simulation';
       configDiv.appendChild(header);
 
       const cellSizeLabel = document.createElement('label');
-      cellSizeLabel.textContent = 'Cellstorlek (pixlar): ';
+      cellSizeLabel.textContent = 'Cellsize (pixels): ';
       cellSizeLabel.setAttribute('for', 'cell-size');
       configDiv.appendChild(cellSizeLabel);
 
@@ -101,7 +101,7 @@ async function loadModules() {
 
       // Predator input
       const predatorLabel = document.createElement('label');
-      predatorLabel.textContent = 'Antal rovdjur: ';
+      predatorLabel.textContent = 'Number of predators: ';
       predatorLabel.setAttribute('for', 'predator-count');
       configDiv.appendChild(predatorLabel);
 
@@ -117,7 +117,7 @@ async function loadModules() {
 
       // Prey input
       const preyLabel = document.createElement('label');
-      preyLabel.textContent = 'Antal byten: ';
+      preyLabel.textContent = 'Number of prey: ';
       preyLabel.setAttribute('for', 'prey-count');
       configDiv.appendChild(preyLabel);
 
@@ -133,7 +133,7 @@ async function loadModules() {
 
       // Predator lifespan
       const predatorLifeLabel = document.createElement('label');
-      predatorLifeLabel.textContent = 'Livslängd rovdjur: ';
+      predatorLifeLabel.textContent = 'Predator lifespan: ';
       predatorLifeLabel.setAttribute('for', 'predator-life');
       configDiv.appendChild(predatorLifeLabel);
 
@@ -149,7 +149,7 @@ async function loadModules() {
 
       // Prey lifespan
       const preyLifeLabel = document.createElement('label');
-      preyLifeLabel.textContent = 'Livslängd byten: ';
+      preyLifeLabel.textContent = 'Prey lifespan: ';
       preyLifeLabel.setAttribute('for', 'prey-life');
       configDiv.appendChild(preyLifeLabel);
 
@@ -165,7 +165,7 @@ async function loadModules() {
 
       // Reproduction threshold
       const reproThresholdLabel = document.createElement('label');
-      reproThresholdLabel.textContent = 'Energitröskel för reproduktion: ';
+      reproThresholdLabel.textContent = 'Reproduction energy threshold: ';
       reproThresholdLabel.setAttribute('for', 'repro-threshold');
       configDiv.appendChild(reproThresholdLabel);
 
@@ -181,7 +181,7 @@ async function loadModules() {
 
       // Grass growth speed
       const grassSpeedLabel = document.createElement('label');
-      grassSpeedLabel.textContent = 'Hastighet för grästillväxt: ';
+      grassSpeedLabel.textContent = 'Number of turns for grass growth: ';
       grassSpeedLabel.setAttribute('for', 'grass-speed');
       configDiv.appendChild(grassSpeedLabel);
 
@@ -198,7 +198,7 @@ async function loadModules() {
 
       // Start button
       const startButton = document.createElement('button');
-      startButton.textContent = 'Starta Simulation';
+      startButton.textContent = 'Start Simulation';
       startButton.style.width = '100%';
       startButton.style.padding = '10px';
       startButton.style.backgroundColor = '#4CAF50';
@@ -380,7 +380,9 @@ async function loadModules() {
       this.deadPredators = [];
       // Remove dead prey
       for (const prey of this.deadPreys) {
-        MapSim.map.incrementPreyDead();
+        if (!prey.wasEaten) {
+          MapSim.map.incrementPreyDead();
+        }
         MapSim.map.removeEntityAt(prey.getCurrentX(), prey.getCurrentY(), prey);
       }
       this.deadPreys = [];
@@ -492,7 +494,7 @@ async function loadModules() {
         prey: {
           born: MapSim.map.getPreyBorn(),
           eaten: MapSim.map.getPreyEaten(),
-          starved: MapSim.map.getPreyDead(),
+          aged: MapSim.map.getPreyDead(),
           final: MapSim.map.getAllPreys().length
         },
         grass: {
@@ -536,7 +538,7 @@ async function loadModules() {
 
       // Create header
       const header = document.createElement('h2');
-      header.textContent = 'Slutgiltig Statistik';
+      header.textContent = 'Final Statistics';
       finalStatsDiv.appendChild(header);
 
       // Create content
@@ -544,25 +546,25 @@ async function loadModules() {
       content.innerHTML = `
         <p><strong>Antal omgångar:</strong> ${MapSim.currentTurn}</p>
 
-        <h3>Rovdjur</h3>
-        <p>Födda: ${MapSim.map.getPredatorBorn()}</p>
-        <p>Döda: ${MapSim.map.getPredatorDead()}</p>
+        <h3>Predators</h3>
+        <p>Born: ${MapSim.map.getPredatorBorn()}</p>
+        <p>Dead: ${MapSim.map.getPredatorDead()}</p>
 
-        <h3>Bytesdjur</h3>
-        <p>Födda: ${MapSim.map.getPreyBorn()}</p>
-        <p>Uppätna: ${MapSim.map.getPreyEaten()}</p>
-        <p>Svältdöda: ${MapSim.map.getPreyDead()}</p>
-        <p>Totalt döda: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
+        <h3>Prey</h3>
+        <p>Born: ${MapSim.map.getPreyBorn()}</p>
+        <p>Eaten: ${MapSim.map.getPreyEaten()}</p>
+        <p>Starved: ${MapSim.map.getPreyDead()}</p>
+        <p>Dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
 
-        <h3>Gräs</h3>
-        <p>Ätit: ${MapSim.map.getGrassEaten()}</p>
-        <p>Växt: ${MapSim.map.getGrassGrown()}</p>
+        <h3>Grass</h3>
+        <p>Eaten: ${MapSim.map.getGrassEaten()}</p>
+        <p>Grown: ${MapSim.map.getGrassGrown()}</p>
       `;
       finalStatsDiv.appendChild(content);
 
       // Create restart button
       const restartButton = document.createElement('button');
-      restartButton.textContent = 'Starta Ny Simulation';
+      restartButton.textContent = 'Start New Simulation';
       restartButton.style.marginTop = '15px';
       restartButton.style.padding = '10px 16px';
       restartButton.style.backgroundColor = '#4CAF50';
@@ -577,7 +579,7 @@ async function loadModules() {
       
       // Create history button
       const historyButton = document.createElement('button');
-      historyButton.textContent = 'Simulationshistorik';
+      historyButton.textContent = 'Simulation History';
       historyButton.style.marginLeft = '20px';
       historyButton.style.backgroundColor = '#9C27B0'; // Purple color
       historyButton.style.color = 'white';
@@ -660,7 +662,7 @@ async function loadModules() {
       
       // Create header
       const header = document.createElement('h2');
-      header.textContent = 'Simulationshistorik';
+      header.textContent = 'Simulation History';
       historyDiv.appendChild(header);
       
       // Create tabs for different metrics
@@ -670,10 +672,10 @@ async function loadModules() {
       
       const tabs = [
         { id: 'population', name: 'Population' },
-        { id: 'births', name: 'Födda' },
-        { id: 'deaths', name: 'Döda' },
-        { id: 'grass', name: 'Gräs' },
-        { id: 'config', name: 'Konfiguration' }
+        { id: 'births', name: 'Born' },
+        { id: 'deaths', name: 'Dead' },
+        { id: 'grass', name: 'Grass' },
+        { id: 'config', name: 'Configuration' }
       ];
       
       tabs.forEach(tab => {
@@ -706,7 +708,7 @@ async function loadModules() {
       
       // Add clear history button
       const clearButton = document.createElement('button');
-      clearButton.textContent = 'Rensa Historik';
+      clearButton.textContent = 'Clear History';
       clearButton.style.marginTop = '20px';
       clearButton.style.marginRight = '10px';
       clearButton.style.padding = '10px 16px';
@@ -716,7 +718,7 @@ async function loadModules() {
       clearButton.style.borderRadius = '4px';
       clearButton.style.cursor = 'pointer';
       clearButton.addEventListener('click', () => {
-        if (confirm('Är du säker på att du vill radera all simulationshistorik?')) {
+        if (confirm('Are you sure you want to clear all simulation history?')) {
           this.simulationHistory = [];
           localStorage.removeItem('simulationHistory');
           document.body.removeChild(historyDiv);
@@ -726,7 +728,7 @@ async function loadModules() {
       
       // Add close button
       const closeButton = document.createElement('button');
-      closeButton.textContent = 'Stäng';
+      closeButton.textContent = 'Close';
       closeButton.style.marginTop = '20px';
       closeButton.style.padding = '10px 16px';
       closeButton.style.backgroundColor = '#2196F3';
@@ -793,14 +795,14 @@ async function loadModules() {
           labels: labels,
           datasets: [
             {
-              label: 'Slutligt antal rovdjur',
+              label: 'Final number of predators',
               data: predatorFinal,
               backgroundColor: 'rgba(255, 99, 132, 0.5)',
               borderColor: 'rgb(255, 99, 132)',
               borderWidth: 1
             },
             {
-              label: 'Slutligt antal byten',
+              label: 'Final number of prey',
               data: preyFinal,
               backgroundColor: 'rgba(54, 162, 235, 0.5)',
               borderColor: 'rgb(54, 162, 235)',
@@ -819,7 +821,7 @@ async function loadModules() {
           plugins: {
             title: {
               display: true,
-              text: 'Slutlig population per simulation'
+              text: 'Final population per simulation'
             }
           }
         }
@@ -843,14 +845,14 @@ async function loadModules() {
           labels: labels,
           datasets: [
             {
-              label: 'Födda rovdjur',
+              label: 'Born Predators',
               data: predatorBorn,
               backgroundColor: 'rgba(255, 99, 132, 0.5)',
               borderColor: 'rgb(255, 99, 132)',
               borderWidth: 1
             },
             {
-              label: 'Födda byten',
+              label: 'Born prey',
               data: preyBorn,
               backgroundColor: 'rgba(54, 162, 235, 0.5)',
               borderColor: 'rgb(54, 162, 235)',
@@ -869,7 +871,7 @@ async function loadModules() {
           plugins: {
             title: {
               display: true,
-              text: 'Antal födda per simulation'
+              text: 'Number of born per simulation'
             }
           }
         }
@@ -886,7 +888,7 @@ async function loadModules() {
       
       const predatorDead = this.simulationHistory.map(data => data.predator.dead);
       const preyEaten = this.simulationHistory.map(data => data.prey.eaten);
-      const preyStarved = this.simulationHistory.map(data => data.prey.starved);
+      const preyStarved = this.simulationHistory.map(data => data.prey.aged);
       
       new Chart(ctx, {
         type: 'bar',
@@ -894,21 +896,21 @@ async function loadModules() {
           labels: labels,
           datasets: [
             {
-              label: 'Döda rovdjur',
+              label: 'Dead predators',
               data: predatorDead,
               backgroundColor: 'rgba(255, 99, 132, 0.5)',
               borderColor: 'rgb(255, 99, 132)',
               borderWidth: 1
             },
             {
-              label: 'Uppätna byten',
+              label: 'Dead prey',
               data: preyEaten,
               backgroundColor: 'rgba(54, 162, 235, 0.5)',
               borderColor: 'rgb(54, 162, 235)',
               borderWidth: 1
             },
             {
-              label: 'Svältdöda byten',
+              label: 'Aged prey',
               data: preyStarved,
               backgroundColor: 'rgba(75, 192, 192, 0.5)',
               borderColor: 'rgb(75, 192, 192)',
@@ -927,7 +929,7 @@ async function loadModules() {
           plugins: {
             title: {
               display: true,
-              text: 'Antal döda per simulation'
+              text: 'Number of dead per simulation'
             }
           }
         }
@@ -951,14 +953,14 @@ async function loadModules() {
           labels: labels,
           datasets: [
             {
-              label: 'Växt gräs',
+              label: 'Grown grass',
               data: grassGrown,
               backgroundColor: 'rgba(75, 192, 192, 0.5)',
               borderColor: 'rgb(75, 192, 192)',
               borderWidth: 1
             },
             {
-              label: 'Ätet gräs',
+              label: 'Grass eaten',
               data: grassEaten,
               backgroundColor: 'rgba(153, 102, 255, 0.5)',
               borderColor: 'rgb(153, 102, 255)',
@@ -977,7 +979,7 @@ async function loadModules() {
           plugins: {
             title: {
               display: true,
-              text: 'Gräsutveckling per simulation'
+              text: 'Grass growth per simulation'
             }
           }
         }
@@ -1002,7 +1004,7 @@ async function loadModules() {
           labels: labels,
           datasets: [
             {
-              label: 'Startantal rovdjur',
+              label: 'Initial amount of predators',
               data: predatorInitial,
               backgroundColor: 'rgba(255, 99, 132, 0.5)',
               borderColor: 'rgb(255, 99, 132)',
@@ -1010,7 +1012,7 @@ async function loadModules() {
               yAxisID: 'y'
             },
             {
-              label: 'Startantal byten',
+              label: 'Initial amount of prey',
               data: preyInitial,
               backgroundColor: 'rgba(54, 162, 235, 0.5)',
               borderColor: 'rgb(54, 162, 235)',
@@ -1018,7 +1020,7 @@ async function loadModules() {
               yAxisID: 'y'
             },
             {
-              label: 'Antal omgångar',
+              label: 'Number of turns',
               data: turns,
               backgroundColor: 'rgba(75, 192, 192, 0.5)',
               borderColor: 'rgb(75, 192, 192)',
@@ -1036,7 +1038,7 @@ async function loadModules() {
               position: 'left',
               title: {
                 display: true,
-                text: 'Startantal'
+                text: 'Initial amount'
               }
             },
             y1: {
@@ -1047,14 +1049,14 @@ async function loadModules() {
               },
               title: {
                 display: true,
-                text: 'Omgångar'
+                text: 'Turns'
               }
             }
           },
           plugins: {
             title: {
               display: true,
-              text: 'Konfiguration och längd per simulation'
+              text: 'Configuration och time per simulation'
             }
           }
         }
