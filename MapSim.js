@@ -588,12 +588,7 @@ async function loadModules() {
       historyButton.addEventListener('click', () => {
         this.showHistoricalComparison();
       });
-  
-      controlsDiv.appendChild(pauseButton);
-      controlsDiv.appendChild(speedUpButton);
-      controlsDiv.appendChild(slowDownButton);
-      controlsDiv.appendChild(resetButton);
-      controlsDiv.appendChild(historyButton); // Add the history button
+      finalStatsDiv.appendChild(historyButton);
       
 
 
