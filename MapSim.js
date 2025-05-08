@@ -457,7 +457,7 @@ async function loadModules() {
       }
 
       // Check if simulation should end
-      if (MapSim.map.getAllPredators().length === 0 && MapSim.map.getAllPreys().length === 0 && MapSim.currentTurn > 0) {
+      if ((MapSim.map.getAllPredators().length === 0 || MapSim.map.getAllPreys().length === 0) && MapSim.currentTurn > 0) {
         cancelAnimationFrame(this.animationId);
         this.showFinalStatistics();
       }
@@ -720,6 +720,7 @@ async function loadModules() {
           this.simulationHistory = [];
           localStorage.removeItem('simulationHistory');
           document.body.removeChild(historyDiv);
+          this.isPaused = wasPaused; // Restore pause state
         }
       });
       
