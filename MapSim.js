@@ -277,6 +277,7 @@ async function loadModules() {
       pauseButton.addEventListener('click', () => {
         this.isPaused = !this.isPaused;
         pauseButton.textContent = this.isPaused ? 'Continue' : 'Pause';
+        this.update();
       });
 
       const speedUpButton = document.createElement('button');
@@ -474,12 +475,15 @@ async function loadModules() {
     }
 
     updateStats() {
+      const alivePreyCount = MapSim.map.getAllPreys().filter(prey => !prey.isDead()).length;
+      const alivePredatorCount = MapSim.map.getAllPredators().filter(predator => !predator.isDead()).length;
+
       const statsDiv = document.getElementById('stats');
       statsDiv.innerHTML = `
         <div class="stats-box">
           <p>Turn: ${MapSim.currentTurn}</p>
-          <p>Predators: ${MapSim.map.getAllPredators().length} (Born: ${MapSim.map.getPredatorBorn()}, Dead: ${MapSim.map.getPredatorDead()})</p>
-          <p>Prey: ${MapSim.map.getAllPreys().length} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Dead of old age: ${MapSim.map.getPreyDead()}, Total dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
+          <p>Predators: ${alivePredatorCount} (Born: ${MapSim.map.getPredatorBorn()}, Dead: ${MapSim.map.getPredatorDead()})</p>
+          <p>Prey: ${alivePreyCount} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Dead of old age: ${MapSim.map.getPreyDead()}, Total dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
           <p>Grass: (Eaten: ${MapSim.map.getGrassEaten()}, Grown: ${MapSim.map.getGrassGrown()})</p>
         </div>
       `;
