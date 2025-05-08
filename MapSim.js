@@ -544,7 +544,7 @@ async function loadModules() {
       // Create content
       const content = document.createElement('div');
       content.innerHTML = `
-        <p><strong>Antal omgångar:</strong> ${MapSim.currentTurn}</p>
+        <p><strong>Number of turns:</strong> ${MapSim.currentTurn}</p>
 
         <h3>Predators</h3>
         <p>Born: ${MapSim.map.getPredatorBorn()}</p>
@@ -636,7 +636,7 @@ async function loadModules() {
     showHistoricalComparison() {
       // Check if we have any historical data
       if (this.simulationHistory.length === 0) {
-        alert('Ingen simulationshistorik tillgänglig ännu.');
+        alert('No simulation history available yet.');
         return;
       }
       
