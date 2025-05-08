@@ -270,6 +270,7 @@ async function loadModules() {
     // Creates all the controls for the user
     setupControls() {
       const controlsDiv = document.getElementById('controls');
+      controlsDiv.innerHTML = ''; // Clear previous controls
 
       const pauseButton = document.createElement('button');
       pauseButton.textContent = 'Pause';
