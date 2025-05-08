@@ -238,6 +238,10 @@ async function loadModules() {
         // Remove the config dialog
         document.body.removeChild(configDiv);
 
+        this.isPaused = false;
+
+        this.setupControls();
+
         // Start the simulation
         this.start();
       });
