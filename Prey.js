@@ -40,17 +40,18 @@ class Prey {
   setEnergy(toValue) {
     this.energy = toValue;
   }
-  
+  // Called when the prey is killed
   killed() {
     this.lifeSpan = 0;
     this.energy = 0;
     Prey.map.incrementPreyEaten();
   }
-  
+  // Check if the prey is dead
   isDead() {
     return this.lifeSpan <= 0;
   }
-  
+  // Move method to randomly change the prey's position
+  // The prey will move to a random adjacent tile
   move() {
     const newX = this.currentX + Math.floor(Math.random() * 3) - 1;
     const newY = this.currentY + Math.floor(Math.random() * 3) - 1;
@@ -61,7 +62,8 @@ class Prey {
       this.currentY = newY;
     }
   }
-  
+  // Check if the prey is near a predator
+  // If so, it will try to escape
   escape() {
     this.predatorNearby = false;
     
@@ -107,7 +109,7 @@ class Prey {
       }
     }
   }
-  
+  // Find the closest predator within a 2-tile radius
   findClosestPredator() {
     let closestPredator = null;
     let closestDistance = Number.MAX_VALUE;
@@ -138,7 +140,7 @@ class Prey {
     }
     return closestPredator;
   }
-  
+  // Turn method to handle the actions of the prey
   turn() {
     if (this.hasActed) {
       return;
@@ -149,7 +151,7 @@ class Prey {
     this.escape();
     this.hasActed = true;
   }
-  
+  // Consume energy method to decrease energy
   consumeEnergy() {
     if (this.energy > 0) {
       this.energy--;
@@ -157,7 +159,7 @@ class Prey {
       this.lifeSpan--;
     }
   }
-  
+  // Age method to decrease life span
   age() {
     if (this.lifeSpan > 0) {
       this.lifeSpan--;
@@ -165,7 +167,7 @@ class Prey {
       this.energy = 0;
     }
   }
-  
+  // Reproduce method to create a new prey
   static procreate(x, y) {
     Prey.map.incrementPreyBorn();
     // Generate random offsets between -4 and +4
@@ -183,7 +185,9 @@ class Prey {
 
     return new Prey(newX, newY);
   }
-  
+  // Eat method to consume grass
+  // This method is called when the prey is on the same tile as grass
+  // and the grass has not been eaten yet
   eat() {
     const entitiesAtCurrentPosition = Prey.map.getEntitiesAt(this.currentX, this.currentY);
     for (const entity of entitiesAtCurrentPosition) {
@@ -196,7 +200,8 @@ class Prey {
       }
     }
   }
-  
+  // Rest method to increase energy
+  // This method is called when the prey is not near a predator
   rest() {
     if (!this.predatorNearby) {
       this.energy += 2;

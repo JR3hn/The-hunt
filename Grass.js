@@ -19,7 +19,7 @@ class Grass {
     getNutrition(){
         return this.nutrition;
     }
-
+    // Turn method to handle the growth of grass
     turn(){
         this.nextGrow++;
         if (this.nextGrow % this.instanceGrowthRate === 0 && this.nutrition <= 2){
@@ -28,7 +28,7 @@ class Grass {
             this.map.incrementGrassGrown();
         }
     }
-
+    // Consume method to decrease the nutrition of grass
     consume(){
         if (this.nutrition > 0){
             this.nutrition--;

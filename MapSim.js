@@ -291,7 +291,7 @@ async function loadModules() {
       const resetButton = document.createElement('button');
       resetButton.textContent = 'Reset Simulation';
       resetButton.style.marginLeft = '20px';
-      resetButton.style.backgroundColor = '#2196F3'; // Blå färg
+      resetButton.style.backgroundColor = '#2196F3'; // Blue color
       resetButton.style.color = 'white';
       resetButton.style.border = 'none';
       resetButton.style.borderRadius = '4px';
@@ -363,7 +363,7 @@ async function loadModules() {
             MapSim.map.addEntityAt(newPredator.getCurrentX(), newPredator.getCurrentY(), newPredator);
             this.newPredators[x][y] = false;
           }
-
+          // Check for new prey in the same cell
           if (this.newPreys[x][y]) {
             const newPrey = Prey.procreate(x, y);
             MapSim.map.addEntityAt(newPrey.getCurrentX(), newPrey.getCurrentY(), newPrey);
@@ -378,7 +378,7 @@ async function loadModules() {
         MapSim.map.removeEntityAt(predator.getCurrentX(), predator.getCurrentY(), predator);
       }
       this.deadPredators = [];
-
+      // Remove dead prey
       for (const prey of this.deadPreys) {
         MapSim.map.incrementPreyDead();
         MapSim.map.removeEntityAt(prey.getCurrentX(), prey.getCurrentY(), prey);
@@ -421,7 +421,7 @@ async function loadModules() {
         prey.turn();
         const currentX = prey.getCurrentX();
         const currentY = prey.getCurrentY();
-
+        // Reproduction check
         if (MapSim.map.hasMultiplePreysAt(currentX, currentY) && prey.getEnergy() >= Prey.reproductionThreshold) {
           this.newPreys[currentX][currentY] = true;
           prey.setEnergy(0);
@@ -519,7 +519,7 @@ async function loadModules() {
       // Save to localStorage
       localStorage.setItem('simulationHistory', JSON.stringify(this.simulationHistory));
       
-      // Continue with your existing code for creating the popup
+      // Create popup for final stats
       const finalStatsDiv = document.createElement('div');
       finalStatsDiv.id = 'final-stats-popup'; // Add ID for easier selection
       finalStatsDiv.style.position = 'fixed';
@@ -603,16 +603,16 @@ async function loadModules() {
         document.body.removeChild(finalStatsPopup);
       }
 
-      // Stoppa animationsloopen
+      // Stop the animation
       cancelAnimationFrame(this.animationId);
 
-      // Återställ statistik
+      // Reset the simulation state
       MapSim.currentTurn = 0;
 
-      // Återställ kartan genom att anropa initialisering igen
+      // Reset the map by calling the initializeMap method
       this.initializeMap();
 
-      // Also reset all Map statistics - they weren't being reset before
+      // Reset all map statistics
       if (MapSim.map) {
         MapSim.map.predatorBorn = 0;
         MapSim.map.preyBorn = 0;
@@ -623,10 +623,10 @@ async function loadModules() {
         MapSim.map.preyDead = 0;
       }
 
-      // Visa konfigurationsrutan igen
+      // Show the configuration dialog again
       this.showConfigDialog();
 
-      // Rensa statistikdisplayen
+      // Clear the stats display
       const statsDiv = document.getElementById('stats');
       statsDiv.innerHTML = '';
     }
