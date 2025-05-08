@@ -86,7 +86,7 @@ class Map {
       }
       return null;
     }
-    
+    // Add an entity to the map at the specified coordinates
     addEntityAt(x, y, entity) {
       if (this.inBounds(x, y)) {
         this.grid[x][y].push(entity);
@@ -102,7 +102,7 @@ class Map {
       }
       return false;
     }
-
+    // Remove an entity from the map at the specified coordinates
     removeEntityAt(x, y, entity) {
         if (this.inBounds(x, y)) {
           const index = this.grid[x][y].indexOf(entity);
@@ -127,7 +127,7 @@ class Map {
         }
         return false;
     }
-
+    // Move an entity from one position to another
     moveEntity(fromX, fromY, toX, toY, entity) {
       if (this.inBounds(toX, toY)) {
         const index = this.grid[fromX][fromY].indexOf(entity);
@@ -156,21 +156,21 @@ class Map {
         return this.prey;
     }
 
-
+    // Get the number of predators at a specific position
     hasMultiplePredatorsAt(x, y) {
         if (this.inBounds(x, y)) {
           return this.predatorCount[x][y] > 1;
         }
         return false;
     }
-    
+    // Get the number of preys at a specific position
     hasMultiplePreysAt(x, y) {
         if (this.inBounds(x, y)) {
           return this.preyCount[x][y] > 1;
         }
         return false;
     }
-    
+    // Add grass at a specific position
     addGrassAt(x, y) {
         if (!this.inBounds(x, y)) {
           return false;
@@ -185,7 +185,7 @@ class Map {
         this.grid[x][y].push(new this.Grass(this));
         return true;
     }
-    
+    // Remove grass at a specific position
     removeGrassAt(x, y) {
       if (!this.inBounds(x, y)) {
         return false;

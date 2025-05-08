@@ -56,7 +56,8 @@ class Predator {
     consumeEnergy(amount) {
         this.energy -= amount;
     }
-
+    // Called when predators procreate
+    // The new predator will be born in a random adjacent tile
     static procreate(x, y) {
       Predator.map.incrementPredatorBorn();
       // Generate random offsets between -4 and +4
@@ -74,14 +75,17 @@ class Predator {
 
       return new Predator(newX, newY);
     }
-
+    // Called when a predator kills a prey
     kill(prey){
       if (prey && !prey.isDead()) {
       prey.killed();
       this.energy += 1;
       }
     }
-
+    // Called when a predator hunts
+    // The predator will search for prey in the adjacent tiles
+    // If it finds one, it will move towards it
+    // If it doesn't find any, it will move randomly
     hunt(){
       const prey = this.search();
       if (prey) {
@@ -93,7 +97,8 @@ class Predator {
         this.hasActed = true;
       }
     }
-
+    // Predator will search for friends in the adjacent tiles
+    // If it finds one, it will move towards it
     findFriends() {
       const friends = [];
       for (let i = -2; i <= 2; i++) {
@@ -114,7 +119,7 @@ class Predator {
       }
       return friends;
     }
-
+    // Signal other predators to move towards the prey
     signalOtherPredators(predators, prey) {
       if (predators && predators.length > 0) {
         // Only signal one other predator (not all of them)
@@ -126,14 +131,14 @@ class Predator {
         }
       }
     }
-
+    // Searches for other predators to mate with
     mateOtherPredators(predator) {
       if (!predator.hasActed){
           predator.moveToFriend(this);
           predator.hasActed = true;
       }
     }
-
+    // Search for prey in the adjacent tiles
     search() {
       // Check current cell
       for (const entity of Predator.map.getEntitiesAt(this.currentX, this.currentY)) {
@@ -168,12 +173,12 @@ class Predator {
       return null;
     }
 
-
+    // Rest to regain energy
     rest() {
       this.energy += 1;
       this.lifeSpan--;
     }
-
+    // Move method to randomly change the predator's position
     moveRandom() {
       //consumeEnergy(1);
       let newX = this.currentX + Math.floor(Math.random() * 3) - 1;
@@ -187,7 +192,7 @@ class Predator {
       this.currentX = newX;
       this.currentY = newY;
     }
-
+    // Move method to move towards the prey
     moveToPrey(prey) {
         //consumeEnergy(1);
         const oldX = this.currentX;
@@ -207,7 +212,7 @@ class Predator {
         // Update position on the map
         Predator.map.moveEntity(oldX, oldY, this.currentX, this.currentY, this);
     }
-
+    // Move method to move towards the friend
     moveToFriend(predator) {
       //consumeEnergy(1);
       const oldX = this.currentX;
@@ -222,7 +227,7 @@ class Predator {
       // Update position on the map
       Predator.map.moveEntity(oldX, oldY, this.currentX, this.currentY, this);
   }
-
+  // Turn method to decide the predator's action
     turn() {
       if (!this.hasActed) {
         const friends = this.findFriends();
