@@ -474,7 +474,7 @@ async function loadModules() {
         <div class="stats-box">
           <p>Turn: ${MapSim.currentTurn}</p>
           <p>Predators: ${MapSim.map.getAllPredators().length} (Born: ${MapSim.map.getPredatorBorn()}, Dead: ${MapSim.map.getPredatorDead()})</p>
-          <p>Prey: ${MapSim.map.getAllPreys().length} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Starved: ${MapSim.map.getPreyDead()}, Dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
+          <p>Prey: ${MapSim.map.getAllPreys().length} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Dead of old age: ${MapSim.map.getPreyDead()}, Total dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
           <p>Grass: (Eaten: ${MapSim.map.getGrassEaten()}, Grown: ${MapSim.map.getGrassGrown()})</p>
         </div>
       `;
@@ -553,7 +553,7 @@ async function loadModules() {
         <h3>Prey</h3>
         <p>Born: ${MapSim.map.getPreyBorn()}</p>
         <p>Eaten: ${MapSim.map.getPreyEaten()}</p>
-        <p>Starved: ${MapSim.map.getPreyDead()}</p>
+        <p>Dead of old age: ${MapSim.map.getPreyDead()}</p>
         <p>Dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()}</p>
 
         <h3>Grass</h3>
@@ -888,7 +888,7 @@ async function loadModules() {
       
       const predatorDead = this.simulationHistory.map(data => data.predator.dead);
       const preyEaten = this.simulationHistory.map(data => data.prey.eaten);
-      const preyStarved = this.simulationHistory.map(data => data.prey.aged);
+      const preyAged = this.simulationHistory.map(data => data.prey.aged);
       
       new Chart(ctx, {
         type: 'bar',
@@ -903,15 +903,15 @@ async function loadModules() {
               borderWidth: 1
             },
             {
-              label: 'Dead prey',
+              label: 'Prey eaten',
               data: preyEaten,
               backgroundColor: 'rgba(54, 162, 235, 0.5)',
               borderColor: 'rgb(54, 162, 235)',
               borderWidth: 1
             },
             {
-              label: 'Aged prey',
-              data: preyStarved,
+              label: 'Prey dead of old age',
+              data: preyAged,
               backgroundColor: 'rgba(75, 192, 192, 0.5)',
               borderColor: 'rgb(75, 192, 192)',
               borderWidth: 1
