@@ -11,6 +11,7 @@ class Prey {
     this.lifeSpan = Prey.initialLife;
     this.energy = Prey.INITIAL_ENERGY;
     this.predatorNearby = false;
+    this.wasEaten = false;
   }
   
   resetTurn() {
@@ -44,6 +45,7 @@ class Prey {
   killed() {
     this.lifeSpan = 0;
     this.energy = 0;
+    this.wasEaten = true;
     Prey.map.incrementPreyEaten();
   }
   
