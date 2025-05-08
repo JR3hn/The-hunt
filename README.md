@@ -39,3 +39,8 @@ In order to maximize efficiency and minimize git conflicts the workload has been
 |Web page      | John Rehn             | Complete         |
 |Counters/stats      | Linus Reichherzer | Complete       |
 |Balancing     | Shared                | Complete   |
+
+
+#### Authors:
+John Rehn - johnreh@kth.se  
+Linus Reichherzer - linusrei@kth.se
