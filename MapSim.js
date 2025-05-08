@@ -34,6 +34,9 @@ async function loadModules() {
       this.animationId = null;
 
       this.showConfigDialog();
+
+      // Load historical simulation data from localStorage if available
+      this.simulationHistory = JSON.parse(localStorage.getItem('simulationHistory')) || [];
     }
 
     // Creates the map
@@ -476,7 +479,47 @@ async function loadModules() {
     }
 
     showFinalStatistics() {
-      // Create popup container
+      // Create simulation summary object
+      const simulationData = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleString(),
+        turns: MapSim.currentTurn,
+        predator: {
+          born: MapSim.map.getPredatorBorn(),
+          dead: MapSim.map.getPredatorDead(),
+          final: MapSim.map.getAllPredators().length
+        },
+        prey: {
+          born: MapSim.map.getPreyBorn(),
+          eaten: MapSim.map.getPreyEaten(),
+          starved: MapSim.map.getPreyDead(),
+          final: MapSim.map.getAllPreys().length
+        },
+        grass: {
+          grown: MapSim.map.getGrassGrown(),
+          eaten: MapSim.map.getGrassEaten()
+        },
+        config: {
+          predatorCount: this.lastPredatorCount,
+          preyCount: this.lastPreyCount,
+          cellSize: MapSim.cellSize,
+          reproThreshold: Predator.reproductionThreshold,
+          grassSpeed: Grass.growthRate
+        }
+      };
+      
+      // Add to history
+      this.simulationHistory.push(simulationData);
+      
+      // Limit history to last 20 simulations
+      if (this.simulationHistory.length > 20) {
+        this.simulationHistory.shift(); // Remove oldest
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('simulationHistory', JSON.stringify(this.simulationHistory));
+      
+      // Continue with your existing code for creating the popup
       const finalStatsDiv = document.createElement('div');
       finalStatsDiv.id = 'final-stats-popup'; // Add ID for easier selection
       finalStatsDiv.style.position = 'fixed';
@@ -530,6 +573,29 @@ async function loadModules() {
       restartButton.style.width = '100%';
       restartButton.addEventListener('click', () => this.resetSimulation());
       finalStatsDiv.appendChild(restartButton);
+      
+      
+      // Create history button
+      const historyButton = document.createElement('button');
+      historyButton.textContent = 'Simulationshistorik';
+      historyButton.style.marginLeft = '20px';
+      historyButton.style.backgroundColor = '#9C27B0'; // Purple color
+      historyButton.style.color = 'white';
+      historyButton.style.border = 'none';
+      historyButton.style.borderRadius = '4px';
+      historyButton.style.padding = '8px 16px';
+      historyButton.style.cursor = 'pointer';
+      historyButton.addEventListener('click', () => {
+        this.showHistoricalComparison();
+      });
+  
+      controlsDiv.appendChild(pauseButton);
+      controlsDiv.appendChild(speedUpButton);
+      controlsDiv.appendChild(slowDownButton);
+      controlsDiv.appendChild(resetButton);
+      controlsDiv.appendChild(historyButton); // Add the history button
+      
+
 
       // Add to document body
       document.body.appendChild(finalStatsDiv);
@@ -568,6 +634,435 @@ async function loadModules() {
       // Rensa statistikdisplayen
       const statsDiv = document.getElementById('stats');
       statsDiv.innerHTML = '';
+    }
+
+    showHistoricalComparison() {
+      // Check if we have any historical data
+      if (this.simulationHistory.length === 0) {
+        alert('Ingen simulationshistorik tillgänglig ännu.');
+        return;
+      }
+      
+      // Pause the simulation while viewing charts
+      const wasPaused = this.isPaused;
+      this.isPaused = true;
+      
+      // Create popup container
+      const historyDiv = document.createElement('div');
+      historyDiv.id = 'history-popup';
+      historyDiv.style.position = 'fixed';
+      historyDiv.style.top = '50%';
+      historyDiv.style.left = '50%';
+      historyDiv.style.transform = 'translate(-50%, -50%)';
+      historyDiv.style.backgroundColor = 'white';
+      historyDiv.style.padding = '20px';
+      historyDiv.style.borderRadius = '8px';
+      historyDiv.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+      historyDiv.style.zIndex = '1000';
+      historyDiv.style.width = '800px';
+      historyDiv.style.height = '600px';
+      historyDiv.style.overflowY = 'auto';
+      
+      // Create header
+      const header = document.createElement('h2');
+      header.textContent = 'Simulationshistorik';
+      historyDiv.appendChild(header);
+      
+      // Create tabs for different metrics
+      const tabsDiv = document.createElement('div');
+      tabsDiv.style.display = 'flex';
+      tabsDiv.style.marginBottom = '15px';
+      
+      const tabs = [
+        { id: 'population', name: 'Population' },
+        { id: 'births', name: 'Födda' },
+        { id: 'deaths', name: 'Döda' },
+        { id: 'grass', name: 'Gräs' },
+        { id: 'config', name: 'Konfiguration' }
+      ];
+      
+      tabs.forEach(tab => {
+        const tabBtn = document.createElement('button');
+        tabBtn.textContent = tab.name;
+        tabBtn.id = `tab-${tab.id}`;
+        tabBtn.style.flex = '1';
+        tabBtn.style.padding = '10px';
+        tabBtn.style.border = '1px solid #ccc';
+        tabBtn.style.backgroundColor = '#f0f0f0';
+        tabBtn.style.cursor = 'pointer';
+        tabBtn.addEventListener('click', () => this.switchHistoryTab(tab.id));
+        tabsDiv.appendChild(tabBtn);
+      });
+      
+      historyDiv.appendChild(tabsDiv);
+      
+      // Create canvas containers for each chart
+      tabs.forEach(tab => {
+        const container = document.createElement('div');
+        container.id = `chart-${tab.id}`;
+        container.style.display = tab.id === 'population' ? 'block' : 'none';
+        container.style.height = '400px';
+        
+        const canvas = document.createElement('canvas');
+        canvas.id = `canvas-${tab.id}`;
+        container.appendChild(canvas);
+        historyDiv.appendChild(container);
+      });
+      
+      // Add clear history button
+      const clearButton = document.createElement('button');
+      clearButton.textContent = 'Rensa Historik';
+      clearButton.style.marginTop = '20px';
+      clearButton.style.marginRight = '10px';
+      clearButton.style.padding = '10px 16px';
+      clearButton.style.backgroundColor = '#FF5722';
+      clearButton.style.color = 'white';
+      clearButton.style.border = 'none';
+      clearButton.style.borderRadius = '4px';
+      clearButton.style.cursor = 'pointer';
+      clearButton.addEventListener('click', () => {
+        if (confirm('Är du säker på att du vill radera all simulationshistorik?')) {
+          this.simulationHistory = [];
+          localStorage.removeItem('simulationHistory');
+          document.body.removeChild(historyDiv);
+        }
+      });
+      
+      // Add close button
+      const closeButton = document.createElement('button');
+      closeButton.textContent = 'Stäng';
+      closeButton.style.marginTop = '20px';
+      closeButton.style.padding = '10px 16px';
+      closeButton.style.backgroundColor = '#2196F3';
+      closeButton.style.color = 'white';
+      closeButton.style.border = 'none';
+      closeButton.style.borderRadius = '4px';
+      closeButton.style.cursor = 'pointer';
+      
+      closeButton.addEventListener('click', () => {
+        document.body.removeChild(historyDiv);
+        this.isPaused = wasPaused; // Restore pause state
+      });
+      
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.justifyContent = 'space-between';
+      buttonContainer.appendChild(clearButton);
+      buttonContainer.appendChild(closeButton);
+      
+      historyDiv.appendChild(buttonContainer);
+      document.body.appendChild(historyDiv);
+      
+      // Create the charts
+      this.createPopulationHistoryChart();
+      this.createBirthsHistoryChart();
+      this.createDeathsHistoryChart();
+      this.createGrassHistoryChart();
+      this.createConfigHistoryChart();
+      
+      // Activate the first tab
+      document.getElementById('tab-population').click();
+    }
+
+    // Switch between chart tabs
+    switchHistoryTab(tabId) {
+      const tabs = ['population', 'births', 'deaths', 'grass', 'config'];
+      tabs.forEach(tab => {
+        const element = document.getElementById(`chart-${tab}`);
+        if (element) {
+          element.style.display = tab === tabId ? 'block' : 'none';
+        }
+        const tabButton = document.getElementById(`tab-${tab}`);
+        if (tabButton) {
+          tabButton.style.backgroundColor = tab === tabId ? '#ddd' : '#f0f0f0';
+          tabButton.style.fontWeight = tab === tabId ? 'bold' : 'normal';
+        }
+      });
+    }
+
+    // Create chart for population comparison
+    createPopulationHistoryChart() {
+      const ctx = document.getElementById('canvas-population').getContext('2d');
+      
+      // Extract data
+      const labels = this.simulationHistory.map((data, index) => 
+        `Sim ${index + 1}`);
+      
+      const predatorFinal = this.simulationHistory.map(data => data.predator.final);
+      const preyFinal = this.simulationHistory.map(data => data.prey.final);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Slutligt antal rovdjur',
+              data: predatorFinal,
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              borderColor: 'rgb(255, 99, 132)',
+              borderWidth: 1
+            },
+            {
+              label: 'Slutligt antal byten',
+              data: preyFinal,
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgb(54, 162, 235)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Slutlig population per simulation'
+            }
+          }
+        }
+      });
+    }
+
+    // Create chart for births comparison
+    createBirthsHistoryChart() {
+      const ctx = document.getElementById('canvas-births').getContext('2d');
+      
+      // Extract data
+      const labels = this.simulationHistory.map((data, index) => 
+        `Sim ${index + 1}`);
+      
+      const predatorBorn = this.simulationHistory.map(data => data.predator.born);
+      const preyBorn = this.simulationHistory.map(data => data.prey.born);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Födda rovdjur',
+              data: predatorBorn,
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              borderColor: 'rgb(255, 99, 132)',
+              borderWidth: 1
+            },
+            {
+              label: 'Födda byten',
+              data: preyBorn,
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgb(54, 162, 235)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Antal födda per simulation'
+            }
+          }
+        }
+      });
+    }
+
+    // Create chart for deaths comparison
+    createDeathsHistoryChart() {
+      const ctx = document.getElementById('canvas-deaths').getContext('2d');
+      
+      // Extract data
+      const labels = this.simulationHistory.map((data, index) => 
+        `Sim ${index + 1}`);
+      
+      const predatorDead = this.simulationHistory.map(data => data.predator.dead);
+      const preyEaten = this.simulationHistory.map(data => data.prey.eaten);
+      const preyStarved = this.simulationHistory.map(data => data.prey.starved);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Döda rovdjur',
+              data: predatorDead,
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              borderColor: 'rgb(255, 99, 132)',
+              borderWidth: 1
+            },
+            {
+              label: 'Uppätna byten',
+              data: preyEaten,
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgb(54, 162, 235)',
+              borderWidth: 1
+            },
+            {
+              label: 'Svältdöda byten',
+              data: preyStarved,
+              backgroundColor: 'rgba(75, 192, 192, 0.5)',
+              borderColor: 'rgb(75, 192, 192)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Antal döda per simulation'
+            }
+          }
+        }
+      });
+    }
+
+    // Create chart for grass comparison
+    createGrassHistoryChart() {
+      const ctx = document.getElementById('canvas-grass').getContext('2d');
+      
+      // Extract data
+      const labels = this.simulationHistory.map((data, index) => 
+        `Sim ${index + 1}`);
+      
+      const grassGrown = this.simulationHistory.map(data => data.grass.grown);
+      const grassEaten = this.simulationHistory.map(data => data.grass.eaten);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Växt gräs',
+              data: grassGrown,
+              backgroundColor: 'rgba(75, 192, 192, 0.5)',
+              borderColor: 'rgb(75, 192, 192)',
+              borderWidth: 1
+            },
+            {
+              label: 'Ätet gräs',
+              data: grassEaten,
+              backgroundColor: 'rgba(153, 102, 255, 0.5)',
+              borderColor: 'rgb(153, 102, 255)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Gräsutveckling per simulation'
+            }
+          }
+        }
+      });
+    }
+
+    // Create chart for configuration comparison
+    createConfigHistoryChart() {
+      const ctx = document.getElementById('canvas-config').getContext('2d');
+      
+      // Extract data
+      const labels = this.simulationHistory.map((data, index) => 
+        `Sim ${index + 1}`);
+      
+      const predatorInitial = this.simulationHistory.map(data => data.config.predatorCount);
+      const preyInitial = this.simulationHistory.map(data => data.config.preyCount);
+      const turns = this.simulationHistory.map(data => data.turns);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Startantal rovdjur',
+              data: predatorInitial,
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              borderColor: 'rgb(255, 99, 132)',
+              borderWidth: 1,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Startantal byten',
+              data: preyInitial,
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgb(54, 162, 235)',
+              borderWidth: 1,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Antal omgångar',
+              data: turns,
+              backgroundColor: 'rgba(75, 192, 192, 0.5)',
+              borderColor: 'rgb(75, 192, 192)',
+              borderWidth: 1,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Startantal'
+              }
+            },
+            y1: {
+              beginAtZero: true,
+              position: 'right',
+              grid: {
+                drawOnChartArea: false
+              },
+              title: {
+                display: true,
+                text: 'Omgångar'
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Konfiguration och längd per simulation'
+            }
+          }
+        }
+      });
     }
   }
   return MapSim
