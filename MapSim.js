@@ -238,6 +238,10 @@ async function loadModules() {
         // Remove the config dialog
         document.body.removeChild(configDiv);
 
+        this.isPaused = false;
+
+        this.setupControls();
+
         // Start the simulation
         this.start();
       });
@@ -266,12 +270,22 @@ async function loadModules() {
     // Creates all the controls for the user
     setupControls() {
       const controlsDiv = document.getElementById('controls');
+      controlsDiv.innerHTML = ''; // Clear previous controls
 
       const pauseButton = document.createElement('button');
       pauseButton.textContent = 'Pause';
       pauseButton.addEventListener('click', () => {
-        this.isPaused = !this.isPaused;
-        pauseButton.textContent = this.isPaused ? 'Continue' : 'Pause';
+        // Check if config dialog or final stats popup is visible
+        const configDialogVisible = document.getElementById('config-dialog') !== null;
+        const finalStatsVisible = document.getElementById('final-stats-popup') !== null;
+        const historyPopupVisible = document.getElementById('history-popup') !== null;
+
+        // Only toggle pause if none of these dialogs are visible
+        if (!configDialogVisible && !finalStatsVisible && !historyPopupVisible) {
+          this.isPaused = !this.isPaused;
+          pauseButton.textContent = this.isPaused ? 'Continue' : 'Pause';
+          this.update();
+        }
       });
 
       const speedUpButton = document.createElement('button');
@@ -374,15 +388,11 @@ async function loadModules() {
 
       // Remove dead entities
       for (const predator of this.deadPredators) {
-        MapSim.map.incrementPredatorDead();
         MapSim.map.removeEntityAt(predator.getCurrentX(), predator.getCurrentY(), predator);
       }
       this.deadPredators = [];
       // Remove dead prey
       for (const prey of this.deadPreys) {
-        if (!prey.wasEaten) {
-          MapSim.map.incrementPreyDead();
-        }
         MapSim.map.removeEntityAt(prey.getCurrentX(), prey.getCurrentY(), prey);
       }
       this.deadPreys = [];
@@ -400,6 +410,7 @@ async function loadModules() {
 
         if (predator.isDead()) {
           this.deadPredators.push(predator);
+          MapSim.map.incrementPredatorDead();
         } else {
           this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
           this.ctx.strokeStyle = 'black';
@@ -431,6 +442,9 @@ async function loadModules() {
 
         if (prey.isDead()) {
           this.deadPreys.push(prey);
+          if (!prey.wasEaten) {
+            MapSim.map.incrementPreyDead();
+          }
         } else {
           this.ctx.fillStyle = 'rgba(0, 0, 255, 0.7)';
           this.ctx.strokeStyle = 'black';
@@ -469,12 +483,15 @@ async function loadModules() {
     }
 
     updateStats() {
+      const alivePreyCount = MapSim.map.getAllPreys().filter(prey => !prey.isDead()).length;
+      const alivePredatorCount = MapSim.map.getAllPredators().filter(predator => !predator.isDead()).length;
+
       const statsDiv = document.getElementById('stats');
       statsDiv.innerHTML = `
         <div class="stats-box">
           <p>Turn: ${MapSim.currentTurn}</p>
-          <p>Predators: ${MapSim.map.getAllPredators().length} (Born: ${MapSim.map.getPredatorBorn()}, Dead: ${MapSim.map.getPredatorDead()})</p>
-          <p>Prey: ${MapSim.map.getAllPreys().length} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Dead of old age: ${MapSim.map.getPreyDead()}, Total dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
+          <p>Predators: ${alivePredatorCount} (Born: ${MapSim.map.getPredatorBorn()}, Dead: ${MapSim.map.getPredatorDead()})</p>
+          <p>Prey: ${alivePreyCount} (Born: ${MapSim.map.getPreyBorn()}, Eaten: ${MapSim.map.getPreyEaten()}, Dead of old age: ${MapSim.map.getPreyDead()}, Total dead: ${MapSim.map.getPreyDead() + MapSim.map.getPreyEaten()})</p>
           <p>Grass: (Eaten: ${MapSim.map.getGrassEaten()}, Grown: ${MapSim.map.getGrassGrown()})</p>
         </div>
       `;
