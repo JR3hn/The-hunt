@@ -380,15 +380,11 @@ async function loadModules() {
 
       // Remove dead entities
       for (const predator of this.deadPredators) {
-        MapSim.map.incrementPredatorDead();
         MapSim.map.removeEntityAt(predator.getCurrentX(), predator.getCurrentY(), predator);
       }
       this.deadPredators = [];
       // Remove dead prey
       for (const prey of this.deadPreys) {
-        if (!prey.wasEaten) {
-          MapSim.map.incrementPreyDead();
-        }
         MapSim.map.removeEntityAt(prey.getCurrentX(), prey.getCurrentY(), prey);
       }
       this.deadPreys = [];
@@ -406,6 +402,7 @@ async function loadModules() {
 
         if (predator.isDead()) {
           this.deadPredators.push(predator);
+          MapSim.map.incrementPredatorDead();
         } else {
           this.ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
           this.ctx.strokeStyle = 'black';
@@ -437,6 +434,9 @@ async function loadModules() {
 
         if (prey.isDead()) {
           this.deadPreys.push(prey);
+          if (!prey.wasEaten) {
+            MapSim.map.incrementPreyDead();
+          }
         } else {
           this.ctx.fillStyle = 'rgba(0, 0, 255, 0.7)';
           this.ctx.strokeStyle = 'black';
