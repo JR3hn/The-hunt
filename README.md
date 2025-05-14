@@ -7,7 +7,7 @@ A lifecycle simulation with grass, prey and predators. Prey runs from predators,
 
 The simulation is ran using Git Pages. No setup needed, just click the link below and the simulation will launch.
 
-https://gits-15.sys.kth.se/pages/johnreh/Projinda-script/
+https://jr3hn.github.io/The-hunt/
 
 ## Using the simulation
 
